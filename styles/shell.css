@@ -1,0 +1,438 @@
+/* The layout shell: the bottom tab bar on compact, the rail on medium, one panel at a time,
+   safe areas, sheets and 48 px targets on coarse pointers. Linked after styles.css, so these
+   rules win ties against the container blocks moved there from the old media queries. */
+
+:root { --tabbar-h: 56px; --appbar-h: 52px; --target: 48px; --card: var(--panel); }
+
+.tabbar { display: none; }
+/* compact app bar: only its first row (all tools, brand, theme) is pinned; the copy link | report
+   row under it scrolls away with the page. The header itself steps out of the layout
+   (display: contents), so the pinned row's containing block is the whole page, not the header */
+body[data-layout="compact"] header { display: contents; }
+body[data-layout="compact"] header .bar { position: sticky; top: 0; z-index: 20; background: var(--bg);
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
+  padding: calc(env(safe-area-inset-top) + 6px) 12px 6px; min-height: 52px; }
+body[data-layout="compact"] header .actions { display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; gap: 8px;
+  padding: 0 12px 6px; }
+body[data-layout="compact"] .tabbar {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  position: fixed; inset: auto 0 0 0; z-index: 30;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--card); border-top: 1px solid var(--line);
+}
+body[data-layout="compact"] .tabbar button { min-height: var(--tabbar-h); display: grid; place-items: center;
+  font-size: 11px; gap: 2px; background: none; border: 0; color: var(--ink3); }
+body[data-layout="compact"] .tabbar button[aria-selected="true"] { color: var(--accent); }
+body[data-layout="compact"] main { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); }
+/* the solve status sits above the tab bar on compact: the wrapped app bar has no free corner */
+body[data-layout="compact"] .busy { top: auto; right: 12px; left: 12px; z-index: 35;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 10px); justify-content: center; }
+/* one tab's panels at a time on compact */
+body[data-layout="compact"] [data-panel] { display: none; }
+body[data-layout="compact"][data-tab="section"] [data-panel~="section"],
+body[data-layout="compact"][data-tab="loads"]   [data-panel~="loads"],
+body[data-layout="compact"][data-tab="curve"]   [data-panel~="curve"],
+body[data-layout="compact"][data-tab="modes"]   [data-panel~="modes"],
+body[data-layout="compact"][data-tab="more"]    [data-panel~="more"] { display: block; }
+/* compact app bar: two aligned rows, all tools / brand / theme over copy link | report, instead of
+   a wrapped flex row whose boxes sat at different heights */
+body[data-layout="compact"] header .spacer { display: none; }
+body[data-layout="compact"] header .brand { min-width: 0;
+  justify-content: center; overflow: hidden; white-space: nowrap; }
+body[data-layout="compact"] header .brand .sub { overflow: hidden; text-overflow: ellipsis; }
+body[data-layout="compact"] header #shareBtn, body[data-layout="compact"] header #reportBtn,
+body[data-layout="compact"] header #docsBtn { justify-content: center; }
+body[data-layout="compact"] .jump { display: none !important; }   /* the tab bar does its job */
+/* tube mode has no FSM loads, modes or tables: the bar is Section, the tube's Results and More (Projects) */
+body[data-layout="compact"][data-shape="tube"] .tabbar { grid-template-columns: repeat(3, 1fr); }
+body[data-shape="tube"] .tabbar [data-go="loads"], body[data-shape="tube"] .tabbar [data-go="modes"] { display: none; }
+/* a tube's More is its Projects alone: the tables and Extensions belong to strip sections */
+body[data-shape="tube"] .morenav[data-for="more"] { display: none !important; }
+.tabbar .tube-lbl, body[data-shape="tube"] .tabbar .fsm-lbl { display: none; }
+body[data-shape="tube"] .tabbar .tube-lbl { display: inline; }
+/* the tab bar replaces the in-card tab row on compact */
+body[data-layout="compact"] .tabs { display: none; }
+@media (pointer: coarse) {
+  .btn, .chip, .tab, .shape, select, input[type=number], input[type=text] { min-height: var(--target); min-width: var(--target); }
+  table.props button.cell, table.props button.rowdel { min-width: var(--target); min-height: var(--target); }
+}
+/* everything else the mobile target check measures: the Nodes & elements sub-tabs, the sigma/lambda
+   toggle, the inline link buttons, the segmented switch's radios (they stretch over their label),
+   the checkboxes and the chart scrubber */
+@media (pointer: coarse) {
+  .subtab, .toggle button, button.link, .home, .seg label, input {
+    min-height: var(--target); min-width: var(--target); }
+}
+.sheet { position: fixed; inset: auto 0 0 0; z-index: 40; background: var(--card);
+  border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgb(0 0 0 / .18);
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom)); overflow: auto; overscroll-behavior: contain; }
+.sheet[data-detent="medium"] { max-height: 52dvh; }
+.sheet[data-detent="large"] { max-height: 92dvh; }
+.sheet::before { content: ""; display: block; width: 36px; height: 5px; border-radius: 3px;
+  background: var(--line); margin: 0 auto 8px; }
+
+/* the tab row wraps instead of clipping its last label on narrow cards */
+.tabs { flex-wrap: wrap; }
+
+/* medium: the analysis card dissolves, so its tab row becomes the rail in the first grid
+   column and its pane the card in the third; on expanded the card keeps both, untouched */
+body[data-layout="medium"] main { grid-template-columns: 80px minmax(0, 1fr) minmax(0, 1fr); }   /* 80: "Extensions" fits the rail */
+body[data-layout="medium"] header { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+body[data-layout="medium"] #analysis { display: contents; }
+body[data-layout="medium"] #tabs { grid-column: 1; grid-row: 1 / span 2;
+  position: sticky; top: var(--appbar-h); height: calc(100dvh - var(--appbar-h));
+     /* pinned under the app bar, bounded to the space below it, so the rail never hangs
+        below the fold at scroll-top and its own scroll engages when the list is long */
+  flex-direction: column; flex-wrap: nowrap;   /* the row wrap rule must not stack this column */
+  border-bottom: 0; border-right: 1px solid var(--line);
+  padding: 6px 4px; overflow-x: hidden; overflow-y: auto; }
+body[data-layout="medium"] .tab { border-bottom: 0; border-left: 3px solid transparent;
+  padding: 11px 4px; min-height: var(--target); white-space: normal; text-align: center;
+  font-size: 12px; line-height: 1.3; }
+body[data-layout="medium"] .tab.on { border-left-color: var(--accent); }
+body[data-layout="medium"] #inputs { grid-column: 2; grid-row: 1; }
+body[data-layout="medium"] #sectionCard { grid-column: 2; grid-row: 2; }
+body[data-layout="medium"] #pane { grid-column: 3; grid-row: 1 / span 2;
+  min-width: 0; overflow: hidden; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow); }
+
+/* compact: each shell tab holding more than one view (Curve: signature | cFSM, Modes: 2D | 3D,
+   More: tables | Extensions) shows its own switch, since the in-card tab row is hidden; in tube mode
+   Curve is the tube's Results, a single view. An open module takes the whole screen under its app bar */
+body[data-layout="compact"][data-tab="curve"]:not([data-shape="tube"]) .morenav[data-for="curve"],
+body[data-layout="compact"][data-tab="modes"] .morenav[data-for="modes"],
+body[data-layout="compact"][data-tab="more"] .morenav[data-for="more"] { display: flex; gap: 2px; margin: 12px 12px 0; padding: 3px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+.morenav button { flex: 1; min-height: var(--target); border: 1px solid transparent; border-radius: 7px;
+  background: transparent; color: var(--ink2); font-size: 14px; cursor: pointer; }
+.morenav button[aria-selected="true"] { background: var(--panel); color: var(--ink); font-weight: 600;
+  border-color: var(--line); box-shadow: 0 1px 2px rgb(0 0 0 / 8%); }
+body[data-layout="compact"].ext-full .ext-module { position: fixed; inset: 0; z-index: 45; overflow: auto;
+  overscroll-behavior: contain; background: var(--bg);
+  padding: 0 12px calc(16px + env(safe-area-inset-bottom)); }
+body[data-layout="compact"].ext-full .ext-bar { position: sticky; top: 0; z-index: 2; margin: 0 -12px 12px;
+  padding: calc(env(safe-area-inset-top) + 6px) 12px 6px; background: var(--bg); border-bottom: 1px solid var(--line);
+  flex-wrap: nowrap; }
+body[data-layout="compact"].ext-full .ext-bar .ext-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body[data-layout="compact"] .ext-toast { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); }
+body[data-layout="compact"].ext-full .ext-toast { bottom: calc(16px + env(safe-area-inset-bottom)); }
+body[data-layout="compact"] .ext-row { flex-wrap: wrap; }
+/* the numField sizing for a module's form: 48 px fields, 16 px text (no iOS zoom) */
+body[data-layout="compact"] .ext-view .mui-field input, body[data-layout="compact"] .ext-view .mui-field select {
+  min-height: 48px; font-size: 16px; }
+@media (pointer: coarse) {
+  .ext-view .mui-host { --mui-target: 48px; }
+  .ext-view .btn, .ext-toast .btn, .morenav button { min-height: var(--target); min-width: var(--target); }
+}
+
+/* ------------------------------------------------ the touch section editor */
+/* the drawing's zoom: strokes, dots, hit circles and labels keep their size on screen (--k = 1/s) */
+.sect .view .strip, .sect .view .dim, .sect .view .cg, .sect .view .node { vector-effect: non-scaling-stroke; }
+.sect .view .node { r: calc(3.4px * var(--k, 1)); }
+.sect .view .hit { r: calc(12px * var(--k, 1)); }
+.sect .view .nlabel { font-size: calc(9.5px * var(--k, 1)); }
+.sect .view .dimtext { font-size: calc(12px * var(--k, 1)); }
+@media (pointer: coarse) { .sect .view .node { r: calc(7px * var(--k, 1)); } }
+.sect .node.sel { fill: var(--accent); stroke: var(--accent); }
+.sect .strip.sel { fill: var(--accent); stroke: var(--accent); }
+#sectionSvg { overflow: hidden; }
+.canvasbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.canvasbar .btn { white-space: nowrap; }
+.canvasbar .cvgroup { display: flex; gap: 6px; }
+.canvasbar .cvspace { flex: 1; }
+.canvasbar .btn { justify-content: center; }
+.canvasbar .btn.icon { min-width: 34px; font-size: 16px; padding: 4px 8px; }
+.canvasbar .btn:disabled { opacity: .4; cursor: default; }
+.canvasbar #cvAdd.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cvhint { display: none; font-size: 12px; color: var(--ink3); margin-top: 6px; }
+@media (pointer: coarse) { .cvhint { display: block; } .canvasbar .btn.icon { min-width: var(--target); } }
+body[data-shape="tube"] .canvasbar, body[data-shape="tube"] .cvhint { display: none; }
+
+/* the node and element sheets: a bottom sheet on compact; a panel at the bottom right on medium
+   and expanded, so the drawing beside it stays in view */
+.editsheet[hidden] { display: none; }
+.editsheet .sheethead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.editsheet h3 { margin: 0; font-size: 16px; }
+.editsheet .field { grid-template-columns: 1fr minmax(0, 170px); }
+.editsheet .field.stack { grid-template-columns: 1fr; }
+.editsheet .field input, .editsheet .field select { font-size: 16px; }   /* no iOS zoom on focus */
+.editsheet .sheetfoot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.editsheet .tbar { margin-top: 4px; }
+.doftoggles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.doftoggles .btn { justify-content: center; }
+.btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line2)); }
+body:not([data-layout="compact"]) .editsheet { left: auto; right: 16px; bottom: 16px; width: min(380px, calc(100vw - 32px));
+  border-radius: 14px; border: 1px solid var(--line); }
+body:not([data-layout="compact"]) .editsheet::before { display: none; }
+
+.apptoast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 50;
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 14px; border-radius: 10px;
+  background: var(--ink); color: var(--bg); box-shadow: var(--shadow); font-size: 14px; max-width: calc(100vw - 32px); }
+.apptoast[hidden] { display: none; }
+.apptoast .btn { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 40%, transparent); }
+body[data-layout="compact"] .apptoast { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); }
+
+/* ------------------------------------------- compact editors and number fields */
+.numfield .inp .pm { flex: none; border: 0; border-left: 1px solid var(--line2); background: none; color: var(--ink2);
+  font: inherit; font-size: 15px; padding: 0 10px; align-self: stretch; cursor: pointer; }
+.numfield .inp .pm:active { color: var(--accent); }
+.numfield input:focus { outline: none; }   /* the .inp box shows the focus */
+.numfield .msg { grid-column: 1 / -1; color: var(--bad); font-size: 12px; margin-top: -2px; }
+.numfield .msg[hidden] { display: none; }
+.numfield input[aria-invalid="true"], table.props input[aria-invalid="true"] { color: var(--bad); }
+table.props input[aria-invalid="true"] { border-color: var(--bad); }
+@media (pointer: coarse) {
+  .numfield input, .editsheet input, .editsheet select, table.props input { font-size: 16px; }   /* no iOS zoom on focus */
+  .numfield .inp .pm { min-width: var(--target); min-height: var(--target); }
+}
+.modelrow { display: none; margin-top: 8px; }
+body[data-layout="compact"]:not([data-shape="tube"]) .modelrow { display: flex; }
+.modelrow .btn { flex: 1; justify-content: center; }
+/* the model sheet: a fixed height at its large detent so the list owns the scroll */
+.modelsheet[hidden] { display: none; }
+.modelsheet { display: flex; flex-direction: column; overflow: hidden; }
+.modelsheet[data-detent="large"] { height: 92dvh; }
+.modelsheet .sheethead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.modelsheet h3 { margin: 0; font-size: 16px; }
+.modelsheet .mseg { display: flex; gap: 2px; padding: 3px; margin: 0 0 8px; background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; scrollbar-width: none; }
+.modelsheet .mseg button { flex: 1 0 auto; padding: 0 5px; font-size: 13px; }
+@media (max-width: 400px) { .modelsheet .mseg button { font-size: 12px; padding: 0 3px; } }
+@media (max-width: 340px) { .modelsheet .mseg button { font-size: 11px; padding: 0 2px; } }
+.modelsheet .mlist { flex: 1; min-height: 0; border-top: 1px solid var(--line); }
+.modelsheet .sheetfoot { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.mrow { display: grid; grid-template-columns: 2.6em minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr); align-items: center;
+  gap: 8px; width: 100%; padding: 0 6px; border: 0; border-bottom: 1px solid var(--line); background: none;
+  color: var(--ink); font: inherit; font-size: 14px; text-align: left; font-variant-numeric: tabular-nums; cursor: pointer; }
+.mrow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mrow span:first-child { color: var(--ink3); }
+.mrow span:last-child { text-align: right; color: var(--ink2); }
+.mrow:active { background: var(--accent-soft); }
+.mrow .dots { letter-spacing: 1px; color: var(--accent); }
+body:not([data-layout="compact"]) .modelsheet { left: auto; right: 16px; bottom: 16px; width: min(440px, calc(100vw - 32px));
+  border-radius: 14px; border: 1px solid var(--line); }
+/* the soft keyboard: a sheet sits on top of it, not behind it (iOS keeps the layout viewport and
+   overlays the keyboard; --kb is the part of the layout viewport the keyboard covers) */
+.sheet { bottom: var(--kb, 0px); }
+.sheet[data-detent="medium"] { max-height: min(52dvh, calc(100dvh - var(--kb, 0px) - 24px)); }
+.modelsheet[data-detent="large"] { height: min(92dvh, calc(100dvh - var(--kb, 0px) - 24px)); }
+
+/* ------------------------------------------------ results on a phone */
+svg.chart .crosshair { stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+svg.chart .marker.sel { fill: var(--accent); stroke: var(--accent); }
+.chartread { min-height: 22px; margin-top: 6px; font-size: 13px; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.chartread b { color: var(--ink); font-weight: 600; }
+.minrow { margin-top: 10px; }
+.modesvg { width: 100%; aspect-ratio: 1 / 1; display: block; touch-action: pan-y; }
+.modebar .stepper { display: inline-flex; align-items: center; gap: 6px; }
+.modebar .btn { justify-content: center; }
+.modebar .stepper .sv { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.resview .fullx { display: none; }
+/* the steppers and play in the thumb zone on compact: a bar standing on the tab bar */
+body[data-layout="compact"][data-tab="modes"] .modebar {
+  position: fixed; left: 0; right: 0; z-index: 25; margin: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  display: grid; grid-template-columns: minmax(0, 1fr) 72px; gap: 8px;
+  padding: 8px max(12px, env(safe-area-inset-left)) 8px max(12px, env(safe-area-inset-right));
+  background: var(--card); border-top: 1px solid var(--line); }
+/* two stepper rows (the labels keep their words at 375 px), play to their right, both rows tall */
+body[data-layout="compact"][data-tab="modes"] .modebar .stepper { grid-column: 1; display: grid;
+  grid-template-columns: var(--target) minmax(0, 1fr) var(--target); gap: 6px; align-items: center; justify-items: center; }
+body[data-layout="compact"][data-tab="modes"] .modebar .stepper .btn { justify-content: center; padding: 0; font-size: 20px; }
+body[data-layout="compact"][data-tab="modes"] .modebar .sv { font-size: 15px; }
+body[data-layout="compact"][data-tab="modes"] .modebar #playBtn { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; flex-direction: column;
+  justify-content: center; gap: 2px; padding: 0; font-size: 13px; }
+body[data-layout="compact"][data-tab="modes"] .modebar #playBtn:only-child { grid-row: 1; grid-column: 1 / -1; flex-direction: row; min-height: var(--target); }
+body[data-layout="compact"][data-tab="modes"] .modebar #playBtn span:first-child { font-size: 18px; }
+body[data-layout="compact"][data-tab="modes"] main { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 140px); }
+body[data-layout="compact"][data-tab="modes"] .busy { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 132px); }
+/* landscape on a phone: the chart or the mode drawing fills the screen, ✕ leaves */
+.resview.full { position: fixed; inset: 0; z-index: 44; background: var(--bg); margin: 0;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+           max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+.resview.full .fullx { display: inline-flex; position: absolute; z-index: 1; justify-content: center;
+  top: max(8px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
+.resview.full .chartbox { flex: 1; min-height: 0; }
+.resview.full svg.chart, .resview.full .modesvg { width: 100%; height: 100%; aspect-ratio: auto; }
+.resview.full .modesvg { flex: 1; min-height: 0; }
+.resview.full .chartread { margin: 0; text-align: center; }
+.resview.full .modebar { position: static; margin: 0; justify-content: center; }
+body.res-full { overflow: hidden; }
+body.res-full .busy { z-index: 46; }
+
+/* ------------------------------------------------ projects on the device */
+.projcur { padding: 4px 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+.projcur .l { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); font-weight: 700; }
+.projcur .n { font-size: 18px; font-weight: 650; margin: 2px 0 4px; overflow-wrap: anywhere; }
+.projstatus { font-size: 13px; color: var(--ink2); }
+.projstatus.error, .projstatus.memory { color: var(--bad); }
+.projacts { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.projacts .btn { justify-content: center; }
+.pane .projh { margin: 18px 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); font-weight: 700; }
+#projMsg { margin-top: 10px; }
+.projlist { list-style: none; margin: 0 0 12px; padding: 0; border-top: 1px solid var(--line); }
+.projrow { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.projrow .projopen { flex: 1; min-width: 0; min-height: var(--target); display: flex; flex-direction: column; align-items: flex-start;
+  justify-content: center; gap: 1px; padding: 4px 6px; border: 0; border-radius: 8px; background: none; color: var(--ink);
+  text-align: left; cursor: pointer; }
+.projrow .projopen:hover { background: var(--accent-soft); }
+.projrow.cur .projopen { cursor: default; }
+.projrow.cur .pn::before { content: "● "; color: var(--accent); }
+.projrow .pn { font-size: 15px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.projrow .pd { font-size: 12px; color: var(--ink3); }
+.projrow .btn { flex: none; justify-content: center; }
+.projrow .projinput { flex: 1; min-width: 0; min-height: var(--target); font: inherit; font-size: 16px; padding: 0 10px;
+  border: 1px solid var(--line2); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.projrow .projinput[aria-invalid="true"] { border-color: var(--bad); }
+/* the More switch: four views, so each button takes its label's width (no two-line "Nodes &
+   elements" at 390 px); the selected state is the switch's own, not the tap flash */
+.morenav[data-for="more"] button { flex: 1 1 auto; padding: 0 8px; white-space: nowrap; }
+.morenav button { -webkit-tap-highlight-color: transparent; }
+/* a toast with a long message (a save that failed) spans the phone's width, its button kept whole */
+body[data-layout="compact"] .apptoast { left: 12px; right: 12px; transform: none; max-width: none; }
+.apptoast .btn { flex: none; white-space: nowrap; }
+.apptoast .btn[hidden] { display: none; }
+#projMsg:not([hidden]) { margin-bottom: 4px; }
+.morenav[data-for="more"] button { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 380px) { .morenav[data-for="more"] button { font-size: 13px; padding: 0 4px; } }
+
+/* ------------------------------------------- installable offline app */
+/* offline: a quiet chip beside the brand, never a wall; everything in the analysis path is cached */
+.netstate { align-self: center; flex: none; font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--warn); border: 1px solid currentColor; border-radius: 999px; padding: 1px 8px; }
+.netstate[hidden] { display: none; }
+body[data-layout="compact"] header .brand .netstate { order: -1; }
+/* Install shows only when the browser offers it: the compact actions row is Copy link and Report
+   sharing what Docs (and Install) leave (grid-auto-flow: column above) */
+/* the update prompt stays until Reload or Later, above the toast's place */
+.swbar { z-index: 51; }
+.swbar .btn[data-act="reload"] { font-weight: 600; }
+
+/* ------------------------------------------- accessibility and touch polish */
+/* for a screen reader only: the signature chart's table of minima */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+#pane:focus, .sheet h3:focus { outline: none; }   /* focus parked on a container or a sheet title */
+#lengths:focus-visible { box-shadow: 0 0 0 1px var(--accent); }
+#mode3dSvg:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 8px; }
+@media (pointer: coarse) {
+  header .brand .mark { display: inline-flex; align-items: center; min-height: var(--target); min-width: var(--target); }
+}
+/* tension strips are dashed as well as blue, so the stress drawing does not rely on hue */
+.sect .strip.tens { stroke: var(--tens); stroke-dasharray: 5 3; stroke-width: 1.6; }
+.legend .sw.dash { background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px); }
+/* reduced motion: no transitions or slides; the busy spinner slows (styles.css) and the mode does
+   not play by itself (app.js) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; scroll-behavior: auto !important; }
+}
+/* a phone's number fields: room for the value, a long unit (N·mm²) and the ± key, down to 288 px
+   (an iPhone SE at 130 % text) */
+body[data-layout="compact"] .numfield:not(.stack) { grid-template-columns: minmax(0, 1fr) minmax(150px, 190px); }
+svg.chart:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* ------------------------------------------- the Python console */
+.pycon { display: grid; gap: 10px; min-width: 0; }
+.pycon-head h3 { margin: 0; font-size: 15px; }
+.pycon-titlerow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pycon-docs { font-size: 13px; padding: 4px 10px; min-height: 30px; text-decoration: none; flex: none; }
+@media (pointer: coarse) { .pycon-docs { min-height: var(--target); min-width: var(--target); justify-content: center; } }
+.pycon-head .note { margin: 4px 0 0; font-size: 12.5px; color: var(--ink2); }
+.pycon-head code { font-size: 12px; }
+.pycon-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+.pycon-bar .btn { justify-content: center; white-space: nowrap; }
+.pycon-bar .pycon-run { min-width: 84px; }
+.pycon-bar .btn:disabled { opacity: 0.5; cursor: default; }
+/* the Examples menu reads as one of the bar's buttons */
+.pycon-examples { font: inherit; border: 1px solid var(--line2); background: var(--panel); color: var(--ink); border-radius: 8px;
+  padding: 6px 10px; cursor: pointer; max-width: 100%; min-width: 0; }
+.pycon-examples:hover { border-color: var(--ink3); }
+.pycon .ck-ed.pycon-drop { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.pycon-saveout { justify-self: start; }
+.pycon-saveout[hidden] { display: none; }
+.pycon .ck-ed { height: 46vh; min-height: 260px; }
+.pycon-out { display: grid; gap: 8px; min-width: 0; }
+.pycon-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--ink2); min-height: 24px; }
+.pycon-badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600;
+  background: var(--accent-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.pycon-badge[hidden] { display: none; }
+.pycon-notice { padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.45; color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--panel)); background: color-mix(in srgb, var(--warn) 10%, var(--panel)); }
+.pycon-notice[hidden], .pycon-stdout[hidden], .pycon-traceback[hidden] { display: none; }
+.pycon-stdout, .pycon-traceback { margin: 0; padding: 10px 12px; border-radius: 8px; max-height: 50vh; overflow: auto;
+  font: 12.5px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums; }
+/* printed output keeps its columns (tables, text charts): it scrolls sideways rather than wrapping */
+.pycon-stdout { background: var(--bg); color: var(--ink); border: 1px solid var(--line); white-space: pre; overflow-wrap: normal; }
+.pycon-traceback { color: color-mix(in srgb, var(--bad) 80%, var(--ink)); border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--panel));
+  background: color-mix(in srgb, var(--bad) 7%, var(--panel)); }
+.pycon-stdout:focus-visible, .pycon-traceback:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+body[data-layout="compact"] .pycon-bar { display: grid; grid-template-columns: 1fr 1fr; }
+body[data-layout="compact"] .pycon-bar :is(.pycon-model, .pycon-examples) { grid-column: 1 / -1; }
+body[data-layout="compact"] .pycon .ck-ed { height: 50vh; min-height: 280px; }
+@media (pointer: coarse) { .pycon-bar .btn, .pycon-examples, .pycon-saveout { min-height: var(--target); } .pycon-stdout, .pycon-traceback { font-size: 13px; } }
+/* full view (js/fullview.js): the console over the whole screen; on a wide screen the editor and its
+   output sit side by side, each scrolling on its own */
+.pycon.ck-full { position: fixed; inset: 0; z-index: 65; margin: 0; overflow: auto; background: var(--bg);
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  align-content: start; }
+.pycon.ck-full .ck-ed { height: 60dvh; resize: none; }
+body[data-layout="compact"] .pycon.ck-full .pycon-head .note { display: none; }   /* the editor gets the room */
+body[data-layout="compact"] .pycon-bar .pycon-full { grid-column: 1 / -1; }
+@media (min-width: 900px) {
+  .pycon.ck-full { grid-template-columns: minmax(0, 1.15fr) minmax(360px, 1fr); grid-template-rows: auto auto minmax(0, 1fr);
+    height: 100dvh; overflow: hidden; column-gap: 16px; }
+  .pycon.ck-full > .pycon-head, .pycon.ck-full > .pycon-bar { grid-column: 1 / -1; }
+  .pycon.ck-full .ck-ed { height: 100%; min-height: 0; }
+  .pycon.ck-full .pycon-out { align-content: start; overflow: auto; min-height: 0; }
+  .pycon.ck-full .pycon-stdout { max-height: none; }
+}
+/* the console's output: printed text and cufsm_rs.plot's figures, in the order the script made them */
+.pycon-stream { display: grid; gap: 8px; min-width: 0; }
+.pycon-stream[hidden] { display: none; }
+.pycon-fig { margin: 0; display: grid; gap: 6px; min-width: 0; justify-items: start; }
+.pycon-fig svg.pycon-figsvg { display: block; width: 100%; height: auto; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 8px; }
+.pycon-fig-section svg.pycon-figsvg, .pycon-fig-mode svg.pycon-figsvg { max-width: 440px; }
+.pycon-fig-signature svg.pycon-figsvg { max-width: 720px; }
+.pycon-fig .sect .node { r: 3.4; cursor: default; }  /* a figure is not the editable section */
+.pycon-fig .figtitle { fill: var(--ink2); font-size: 13px; font-weight: 600; }
+.pycon-fig .figtitle .swc { fill: var(--comp); }
+.pycon-fig .figtitle .swt { fill: var(--tens); }
+.pycon-figbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12.5px; color: var(--ink2); }
+@media (pointer: coarse) { .pycon-figdl { min-height: var(--target); } }
+/* with figures between them, the printed parts are read in sequence: each shows whole, so the
+   lines that introduce a figure are never scrolled out of sight inside a box above it */
+.pycon-stream:has(> .pycon-fig) > .pycon-stdout { max-height: none; }
+/* a phone shows the 600-unit chart at about half size: its text is drawn larger to stay legible
+   (the minimum labels are measured as drawn, so they are still placed clear of each other) */
+body[data-layout="compact"] .pycon-fig svg.chart :is(.tick, .axlabel) { font-size: 17px; }
+body[data-layout="compact"] .pycon-fig svg.chart .mlabel { font-size: 17px; }
+body[data-layout="compact"] .pycon-fig .sect :is(.dimtext, .nlabel) { font-size: 15px; }
+body[data-layout="compact"] .pycon-fig .figtitle { font-size: 17px; }
+/* the full runtime: the download prompt and matplotlib's figures */
+.pycon-consent { display: grid; gap: 10px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--panel)); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+.pycon-consent[hidden] { display: none; }
+.pycon-consent h4 { margin: 0; font-size: 14px; }
+.pycon-consent p { margin: 0; }
+.pycon-consent ul { margin: 0; padding-left: 18px; color: var(--ink2); }
+.pycon-consent .pycon-consent-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.pycon-consent label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.pycon-consent input[type="checkbox"] { width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--accent); }
+.pycon-why { font-size: 12.5px; color: var(--ink2); }
+.pycon-why[hidden] { display: none; }
+.pycon-fig img.pycon-figimg { display: block; width: 100%; max-width: 720px; height: auto; background: #fff;
+  border: 1px solid var(--line); border-radius: 8px; }
+.pycon-forget { justify-self: start; font-size: 12.5px; }
+.pycon-forget[hidden] { display: none; }
+@media (pointer: coarse) { .pycon-consent .btn, .pycon-consent label { min-height: var(--target); } }
+
+/* the footer ends above the fixed tab bar, not under it, so its last line can be read and tapped */
+body[data-layout="compact"] footer { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px); }
+/* the footer's open-source line: each link a 48 px target on a touch screen, still in the text */
+@media (pointer: coarse) {
+  footer .oss a { display: inline-flex; align-items: center; justify-content: center;
+    min-height: var(--target); min-width: var(--target); }
+}

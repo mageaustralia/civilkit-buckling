@@ -1,0 +1,218 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Troubleshooting and FAQ · CivilKit Buckling guide</title>
+<meta name="description" content="The messages you are most likely to meet, what causes each, the limits a module runs within, and questions about the Python console.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html" aria-current="page"><span class="g-num">14</span> Troubleshooting and FAQ</a>
+      <ul>
+        <li><a href="#install-errors">Install and pack errors</a></li>
+        <li><a href="#errors">Errors while a module runs</a></li>
+        <li><a href="#limits">Limits</a></li>
+        <li><a href="#faq">Questions</a></li>
+        <li><a href="#console">The Python console</a></li>
+      </ul></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Troubleshooting and FAQ</h1>
+<p class="g-lede">The messages you are most likely to meet, what causes each, the limits a module runs within, and
+questions about the <a href="#console">Python console</a>.</p>
+
+<h2 id="install-errors">Install and pack errors<a class="g-anchor" href="#install-errors" aria-label="Link to this section">#</a></h2>
+<p>Shown in the Extensions status line, by the builder's Export, and by <code>ckext pack</code> and
+<code>ckext test</code>. Nothing is installed.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Message</th><th>Cause and fix</th></tr></thead>
+  <tbody>
+    <tr><td class="wrap"><code>This module is for CivilKit Studio: its contribution points (design-check) are not among this app's (buckling.tool)</code></td><td>A Studio module. Its capabilities are Studio's, so it cannot run here. A Buckling module contributes <code>{"point": "buckling.tool", …}</code>.</td></tr>
+    <tr><td class="wrap"><code>manifest.json missing required field: civilkitApi</code></td><td>One of <code>id</code>, <code>name</code>, <code>version</code>, <code>civilkitApi</code>, <code>contributes</code> is missing. See <a href="index.html#manifest">manifest.json</a>.</td></tr>
+    <tr><td class="wrap"><code>manifest.version is not a valid semver</code></td><td>Use <code>1.0.0</code>, not <code>1</code> or <code>v1</code>.</td></tr>
+    <tr><td class="wrap"><code>manifest.civilkitApi 2.0 is incompatible with host 1.0.0</code></td><td>Use <code>"^1.0"</code>.</td></tr>
+    <tr><td class="wrap"><code>Bundle missing manifest.json</code>, <code>Failed to unzip bundle: …</code></td><td>Not a .ckext, or zipped from outside the folder so the paths have a folder prefix. Zip from inside the folder, or use <code>ckext pack</code>.</td></tr>
+    <tr><td class="wrap"><code>The worked examples are not valid JSON: …</code></td><td>The builder's Export found a JSON slip on the worked examples tab; the message gives the position.</td></tr>
+    <tr><td class="wrap"><code>Installed … (Community). Worked example ‹id›: ‹diff›</code></td><td>Installed, but the named example did not reproduce its numbers. Run <span class="ui">Test</span> in the builder, or <code>ckext test</code>, to see every diff.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="errors">Errors while a module runs<a class="g-anchor" href="#errors" aria-label="Link to this section">#</a></h2>
+<p>Shown in the module's error box (after the module's name), in the builder's preview with the line marked when it is a
+Python error, as a worked example's diff, and as <code>error:</code> in <code>ckext test</code>.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Message</th><th>Cause and fix</th></tr></thead>
+  <tbody>
+    <tr><td class="wrap"><code>Capability 'signature' not declared in the module manifest</code></td><td>Add it to <code>capabilities</code> (the builder's manifest checklist). See <a href="capabilities.html#declaring">declaring</a>.</td></tr>
+    <tr><td class="wrap"><code>Capability 'getSectionProps' not granted</code></td><td>Declared, but Buckling has no such capability (here, a Studio one). The <a href="capabilities.html">capability reference</a> has the list.</td></tr>
+    <tr><td class="wrap"><code>NameError: name 'O' isn't defined</code> (and other Python errors)</td><td>A bug in <code>main.py</code>, at the line the traceback or the builder's mark names. MicroPython words some messages differently from CPython.</td></tr>
+    <tr><td class="wrap"><code>SyntaxError: invalid syntax</code></td><td>Python could not read the file; the marked line is where it gave up, which may be just after the mistake (a missing colon or bracket).</td></tr>
+    <tr><td class="wrap"><code>fy must be a positive finite number</code></td><td><code>firstYield</code> was called without a positive <code>fy</code>. A blank form field arrives as <code>""</code>; fall back to <code>getModel()["fy"]</code>.</td></tr>
+    <tr><td class="wrap"><code>a length is not a positive finite number</code></td><td><code>signature</code> got a zero, negative or missing length, or <code>modes</code> no <code>length</code>.</td></tr>
+    <tr><td class="wrap"><code>undefined is not iterable (cannot read property Symbol(Symbol.iterator))</code></td><td><code>signature</code> was called without <code>lengths</code>. They are required.</td></tr>
+    <tr><td class="wrap"><code>unknown boundary condition "s-s"</code></td><td>End conditions are <code>S-S</code>, <code>C-C</code>, <code>S-C</code>, <code>C-F</code>, <code>C-G</code>, in capitals.</td></tr>
+    <tr><td class="wrap"><code>Cannot read properties of undefined (reading 'flat')</code></td><td>A <code>model</code> passed to a capability has no <code>springs</code> or <code>constraints</code> list. Add <code>"springs": [], "constraints": []</code>, or build it from a copy of <code>getModel()</code>.</td></tr>
+    <tr><td class="wrap"><code>a model needs mats, nodes and elems</code></td><td>No model at all: a worked example without a <code>model</code> whose module reads one, or a model missing a list.</td></tr>
+    <tr><td class="wrap"><code>element 1 refers to node 100, which does not exist</code></td><td>Element node indices are 0-based and must be below the number of nodes.</td></tr>
+    <tr><td class="wrap"><code>element 1 has thickness 0</code></td><td>Every element needs t above zero.</td></tr>
+    <tr><td class="wrap"><code>element 3 uses material 2, which is not defined</code></td><td>An element's <code>mat</code> must be the <code>id</code> of a material in <code>mats</code>.</td></tr>
+    <tr><td class="wrap"><code>the model has 6000 nodes; the limit is 5000</code></td><td>Mesh less finely.</td></tr>
+    <tr><td class="wrap"><code>Expected property name or '}' in JSON at position 1 …</code></td><td>A capability got text that is not JSON. Pass <code>json.dumps(dict)</code>, not a string you built.</td></tr>
+    <tr><td class="wrap"><code>The module stopped responding and was stopped.</code></td><td>A call took more than 20 seconds: an endless loop, or too many solves. The sandbox restarts; the next Run starts the module afresh. Solve fewer lengths or fewer variants per run.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="limits">Limits<a class="g-anchor" href="#limits" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Limit</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Time per call (opening, each run, each worked example at install)</td><td>20 seconds</td></tr>
+    <tr><td>Nodes in a model a capability will take, or a proposal</td><td>5000</td></tr>
+    <tr><td>Python heap (MicroPython)</td><td>16 MB</td></tr>
+    <tr><td>Network, storage, page access</td><td>none (see <a href="using.html#sandbox">the sandbox</a>)</td></tr>
+    <tr><td>Contribution points</td><td><code>buckling.tool</code> only</td></tr>
+  </tbody>
+</table></div>
+<p>As a guide to time: a signature curve of the default lipped C at 50 lengths, with a <code>modes</code> call at each
+minimum, takes well under a second on a laptop; the Thickness study's 15 steps are its upper bound for that reason.</p>
+
+<h2 id="faq">Questions<a class="g-anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="faq-catch">Why doesn't <code>try</code> / <code>except</code> catch a capability error?<a class="g-anchor" href="#faq-catch" aria-label="Link to this section">#</a></h3>
+<p>In this version an error raised by the host (an undeclared call, an invalid model, an engine refusal) ends the call
+outright, and Python's exception handling does not see it. Check arguments before calling, as the reference modules do,
+and raise a <code>ValueError</code> with a clear sentence yourself.</p>
+
+<h3 id="faq-print">Where does <code>print</code> or <code>civilkit.log</code> output go?<a class="g-anchor" href="#faq-print" aria-label="Link to this section">#</a></h3>
+<p>To <code>ckext test</code>, as <code>stdout:</code> and <code>log:</code> lines. The app does not show it in this
+version. Debug with the command line, or temporarily return what you want to see as a result row.</p>
+
+<h3 id="faq-import">Which Python modules can I import?<a class="g-anchor" href="#faq-import" aria-label="Link to this section">#</a></h3>
+<p><code>json</code> and <code>math</code>, and the rest of MicroPython's small built-in set. There is no
+<code>numpy</code>, no <code>typing</code>, no <code>dataclasses</code>, no file system and no network (the
+<a href="#faq-numpy-ext">console's full Python</a> is not available to extensions). Use
+<code>"%.4g" % v</code> formatting; f-strings work, but keep them simple. Integer division with <code>/</code> gives a
+float, as in Python 3.</p>
+
+<h3 id="faq-units">What units?<a class="g-anchor" href="#faq-units" aria-label="Link to this section">#</a></h3>
+<p>N, mm and MPa everywhere: coordinates and lengths in mm, stresses and moduli in MPa, P in N, moments in N·mm, the
+bimoment in N·mm², areas in mm², I and J in mm⁴, Cw in mm⁶. Convert for display (kN, kN·m) in your own rows, and say so
+in the unit.</p>
+
+<h3 id="faq-results">My module reads <code>getResults</code>, but its worked example sees nothing.<a class="g-anchor" href="#faq-results" aria-label="Link to this section">#</a></h3>
+<p>By design: a worked example's fixture is never solved, so <code>hasResults()</code> is <code>False</code>. Either make
+the example test the no-results path, or solve the curve yourself with <code>signature</code>, which works in examples
+and makes the module independent of the app's load case.</p>
+
+<h3 id="faq-fork">I forked a module and installing it replaced nothing. Where is it?<a class="g-anchor" href="#faq-fork" aria-label="Link to this section">#</a></h3>
+<p>A fork has its own id (<code>…-fork</code>) and name (<code>… (fork)</code>), so it installs beside the original.
+Both appear under Installed.</p>
+
+<h3 id="faq-lost">My installed modules or my draft disappeared.<a class="g-anchor" href="#faq-lost" aria-label="Link to this section">#</a></h3>
+<p>They live in this browser's storage for this site. Clearing site data, a private window, or another browser or device
+starts empty. Keep the <code>.ckext</code> files; reinstall them from a file.</p>
+
+<h3 id="faq-same">Can I use one module in both Buckling and Studio?<a class="g-anchor" href="#faq-same" aria-label="Link to this section">#</a></h3>
+<p>Not as it is: the two apps offer different capabilities and contribution points, and each refuses the other's
+modules. The format, the UI tree and the worked-example rules are the same, so most of a module's structure carries
+over; the engine calls do not.</p>
+
+<h3 id="faq-review">Is a Verified module safe to use for design?<a class="g-anchor" href="#faq-review" aria-label="Link to this section">#</a></h3>
+<p>Verified means its worked examples reproduce their cited numbers. It is a test gate, not a review: someone still has
+to check that the examples are the right ones, that the clauses are current, and that the module applies to your
+section. Read its <code>source</code> lines and its README.</p>
+
+<h2 id="console">The Python console<a class="g-anchor" href="#console" aria-label="Link to this section">#</a></h2>
+<h3 id="faq-typo">Why does a typo ask me to download full Python?<a class="g-anchor" href="#faq-typo" aria-label="Link to this section">#</a></h3>
+<p>Before running a script the console compiles it on MicroPython. A <code>SyntaxError</code> there usually means syntax
+MicroPython does not have (some f-string forms, <code>match</code>), which full Python does, so the console offers to
+run it there (<a href="runtimes.html#compile">the compile check</a>). It cannot tell that from a typo: a missing
+bracket or colon is a <code>SyntaxError</code> too. Choose <span class="ui">Not now</span>: the console shows
+MicroPython's error, with the line marked. Fix it and run again. Once full Python is on the device it is not asked
+for again, and full Python reports the typo itself.</p>
+
+<h3 id="faq-numpy-download">Why is my numpy script asking to download?<a class="g-anchor" href="#faq-numpy-download" aria-label="Link to this section">#</a></h3>
+<p>numpy is not part of MicroPython, which the console runs first. A script that imports numpy, scipy, matplotlib or
+another module MicroPython lacks needs full Python (Pyodide): 12.9 MB for Python, 2.8 MB for numpy, more for
+matplotlib (9.8 MB) or scipy (13.4 MB). The console downloads it only when you agree, once: it is kept on the device and
+works offline after that. Tick <span class="ui">Always load it on this device without asking</span> to skip the
+question. To avoid the download, write the script without numpy: <code>cufsm_rs</code> itself works on MicroPython
+(<a href="runtimes.html#compat">one-way compatibility</a>).</p>
+
+<h3 id="faq-scripts">Where do my scripts go?<a class="g-anchor" href="#faq-scripts" aria-label="Link to this section">#</a></h3>
+<p>Nowhere but this browser. A script runs in a background worker on your device; there is no server, and nothing is
+uploaded. The editor's text is kept as a draft in this browser's storage for this site, one per browser and device: a
+private window, another browser or clearing the site's data starts afresh. Use <span class="ui">Download</span> to keep
+a script as a <code>.py</code> file, and <span class="ui">Open…</span> to bring it back
+(<a href="console.html#drafts">drafts and files</a>).</p>
+
+<h3 id="faq-digits">Why do numbers differ in the last digits between runtimes?<a class="g-anchor" href="#faq-digits" aria-label="Link to this section">#</a></h3>
+<p>Between the console's two Pythons, the numbers are the same; their printing is not. Both call the same engine and
+numbers cross bit for bit, but MicroPython's float formatting is not correctly rounded, so <code>print(x)</code> can
+show a different last digit from full Python's. Format what you print (<code>"%.6g" % x</code>) and the two nearly always agree.
+Against <code>pip install cufsm-rs-py</code> on your own machine the results themselves can differ slightly: the browser
+engine and the native one use different maths libraries for sine, cosine and arctangent, and where a problem is
+ill-conditioned (very long half-wavelengths, the classification of an unsymmetric section) a last-bit difference grows.
+<a href="runtimes.html#numbers">The same numbers</a> gives the sizes.</p>
+
+<h3 id="faq-numpy-ext">Can a shared extension use numpy?<a class="g-anchor" href="#faq-numpy-ext" aria-label="Link to this section">#</a></h3>
+<p>No. Extensions stay on MicroPython, in their sandbox, with no network, storage or page access, and only the
+capabilities they declare. Full Python in the console can <code>import js</code> and reach the page, which is fine for
+your own script and not for a module someone else published. Put numpy work in a console script, or write the module
+with loops; its engine numbers come from capabilities either way.</p>
+
+<h3 id="faq-fallback">My script has no numpy, but it ran on full Python.<a class="g-anchor" href="#faq-fallback" aria-label="Link to this section">#</a></h3>
+<p>It used something MicroPython lacks partway through: a built-in, a module function, a keyword such as
+<code>json.dumps(x, indent=2)</code>, or numpy-style use of a result (<code>r.curve * 2</code>,
+<code>a[i, j]</code>). The line under the badge says which line stopped MicroPython and why
+(<a href="runtimes.html#fallback">the runtime fallback</a>). Change that line and it runs on MicroPython again.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="engine-api.html"><small>Previous</small>‹ Engine API (Rust / wasm)</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

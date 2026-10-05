@@ -1,0 +1,322 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>MicroPython and full Python · CivilKit Buckling guide</title>
+<meta name="description" content="The console's two Pythons: MicroPython, already in the page, and full Python (Pyodide), downloaded once you agree. How the console picks one, what each downloads, and why all the mechanics run in the Rust engine in both.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html" aria-current="page"><span class="g-num">10</span> MicroPython and full Python</a>
+      <ul>
+        <li><a href="#two">The two runtimes</a></li>
+        <li><a href="#where">What runs where</a></li>
+        <li><a href="#choose">How the console picks one</a></li>
+        <li><a href="#consent">The download prompt</a></li>
+        <li><a href="#always">Always, Remove and offline</a></li>
+        <li><a href="#badge">The runtime badge</a></li>
+        <li><a href="#compat">One-way compatibility</a></li>
+        <li><a href="#arrays">Why results are Arrays</a></li>
+        <li><a href="#numbers">The same numbers</a></li>
+      </ul></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">MicroPython and full Python</h1>
+<p class="g-lede">The console has two Pythons. MicroPython is already in the page and starts in milliseconds; it runs
+most scripts. Full Python (Pyodide, CPython compiled to WebAssembly) runs what MicroPython cannot, such as numpy,
+scipy and matplotlib, and is downloaded only when a script needs it and you agree. Both call the same engine.</p>
+
+<h2 id="two">The two runtimes<a class="g-anchor" href="#two" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th></th><th>MicroPython</th><th>Full Python</th></tr></thead>
+  <tbody>
+    <tr><td>What it is</td><td>MicroPython 1.24.1, a small Python 3, compiled to WebAssembly</td><td>Pyodide 314.0.7: CPython 3.14.2 compiled to WebAssembly</td></tr>
+    <tr><td>Download</td><td>none extra: part of the page, loaded when the console first opens</td><td>12.9 MB, plus the packages a script imports, after you agree (<a href="#consent">sizes</a>)</td></tr>
+    <tr><td><code>import cufsm_rs</code> gives</td><td><b>cufsm_rs lite</b>: the package's names, signatures and defaults, written for MicroPython</td><td>the <b>published package's own Python code</b> (cufsm-rs-py 0.1.0), unchanged, with its compiled part replaced by the page's engine</td></tr>
+    <tr><td>Arrays</td><td><a href="#arrays"><code>Array</code></a>: nested lists with numpy's shape and indexing</td><td>numpy <code>ndarray</code></td></tr>
+    <tr><td><code>cufsm_rs.plot</code></td><td>drawn by the page (SVG in the page's colours), returns a <code>Figure</code></td><td>matplotlib, returns the Axes</td></tr>
+    <tr><td>Other modules</td><td><code>json</code>, <code>math</code>, <code>cmath</code>, <code>time</code>, <code>sys</code>, <code>array</code>, <code>collections</code>, <code>random</code>, <code>struct</code>, <code>re</code>, <code>io</code>, <code>itertools</code>, <code>functools</code>, <code>heapq</code>, <code>copy</code>, <code>operator</code>, <code>string</code>, and the examples' <code>dsm</code> (MicroPython's versions: smaller than CPython's)</td><td>the standard library, numpy, scipy and matplotlib (with the packages matplotlib uses), and <code>dsm</code></td></tr>
+    <tr><td>Start-up</td><td>a fresh interpreter per run, about 5 ms</td><td>a few seconds, once per session; then fresh globals per run</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="where">What runs where<a class="g-anchor" href="#where" aria-label="Link to this section">#</a></h2>
+<div class="g-rule">
+<p><b>All mechanics run in the Rust engine, in every mode.</b> Section properties, stresses, first yield, the
+eigenvalue solves, load factors, modes, signature-curve minima, the cFSM classification and the section templates all
+come from <code>cufsm.wasm</code>, the same engine the analysis on screen uses. Python only organises the inputs,
+packages the results and plots them.</p>
+</div>
+<figure class="g-dia">
+<svg viewBox="0 0 440 432" role="img" aria-labelledby="dia1-t dia1-d">
+  <title id="dia1-t">What runs where</title>
+  <desc id="dia1-d">Your script runs on MicroPython with cufsm_rs lite, or on full Python (Pyodide) with the published cufsm_rs package. Both call one function, call(op, json), which turns CUFSM's tables into the engine's buffers. The engine, cufsm.wasm, compiled from the Rust crate cufsm-rs, does every solve. Python organises inputs, packages results and plots; the engine does the mechanics.</desc>
+  <defs><marker id="dia1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="g-dia-head" d="M0 0L10 5L0 10z"/></marker></defs>
+  <rect class="g-dia-box" x="40" y="8" width="392" height="52" rx="9"/>
+  <text class="g-dia-t" x="236" y="31" text-anchor="middle">Your script</text>
+  <text class="g-dia-s" x="236" y="49" text-anchor="middle">import cufsm_rs · loops, design rules, tables</text>
+  <rect class="g-dia-box g-dia-py" x="40" y="96" width="186" height="104" rx="9"/>
+  <text class="g-dia-t" x="133" y="120" text-anchor="middle">MicroPython</text>
+  <text class="g-dia-s" x="133" y="140" text-anchor="middle">cufsm_rs lite</text>
+  <text class="g-dia-s" x="133" y="158" text-anchor="middle">Array results</text>
+  <text class="g-dia-s" x="133" y="176" text-anchor="middle">page-drawn figures</text>
+  <text class="g-dia-s" x="133" y="192" text-anchor="middle">always there</text>
+  <rect class="g-dia-box g-dia-py" x="246" y="96" width="186" height="104" rx="9"/>
+  <text class="g-dia-t" x="339" y="120" text-anchor="middle">Full Python (Pyodide)</text>
+  <text class="g-dia-s" x="339" y="140" text-anchor="middle">the package's own code</text>
+  <text class="g-dia-s" x="339" y="158" text-anchor="middle">numpy arrays, scipy</text>
+  <text class="g-dia-s" x="339" y="176" text-anchor="middle">matplotlib figures</text>
+  <text class="g-dia-s" x="339" y="192" text-anchor="middle">downloaded if you agree</text>
+  <rect class="g-dia-box" x="40" y="236" width="392" height="68" rx="9"/>
+  <text class="g-dia-t" x="236" y="260" text-anchor="middle">call(op, json): one transport</text>
+  <text class="g-dia-s" x="236" y="279" text-anchor="middle">CUFSM's prop, node, elem, springs, constraints</text>
+  <text class="g-dia-s" x="236" y="295" text-anchor="middle">to the engine's buffers; numbers bit for bit</text>
+  <rect class="g-dia-box g-dia-rs" x="40" y="340" width="392" height="84" rx="9"/>
+  <text class="g-dia-t" x="236" y="364" text-anchor="middle">cufsm.wasm: the Rust engine (cufsm-rs)</text>
+  <text class="g-dia-s" x="236" y="383" text-anchor="middle">properties · stresses · first yield · eigen solves</text>
+  <text class="g-dia-s" x="236" y="399" text-anchor="middle">load factors · modes · minima · cFSM · templates</text>
+  <text class="g-dia-s" x="236" y="415" text-anchor="middle">the same engine as the analysis on screen</text>
+  <path class="g-dia-line" d="M180 60V92" marker-end="url(#dia1-a)"/>
+  <path class="g-dia-line" d="M292 60V92" marker-end="url(#dia1-a)"/>
+  <path class="g-dia-line" d="M133 200V232" marker-end="url(#dia1-a)"/>
+  <path class="g-dia-line" d="M339 200V232" marker-end="url(#dia1-a)"/>
+  <path class="g-dia-line" d="M236 304V336" marker-end="url(#dia1-a)"/>
+  <path class="g-dia-brace" d="M26 10V302"/>
+  <text class="g-dia-side" transform="translate(18 156) rotate(-90)" text-anchor="middle">Python: inputs, results, plots</text>
+  <path class="g-dia-brace g-dia-brace-rs" d="M26 342V422"/>
+  <text class="g-dia-side" transform="translate(18 382) rotate(-90)" text-anchor="middle">Rust</text>
+</svg>
+<figcaption>Both Pythons reach the engine through one function. Neither does mechanics.</figcaption>
+</figure>
+<p>What the Python layers do, exactly:</p>
+<ul>
+  <li><b>Organise the inputs.</b> Build <code>Model</code> tables, check their shapes, expand <code>m_all</code> into
+    one term list per length, fill a template's defaults.</li>
+  <li><b>Package the results.</b> Stack each length's load factors and modes into arrays (NaN where fewer modes were
+    found), split a mode vector into <code>u</code>, <code>v</code>, <code>w</code> and <code>theta</code>, and
+    evaluate a mode's longitudinal shape functions along the member (<code>ModeShape.at</code>), as the published
+    package does.</li>
+  <li><b>Plot.</b> The figures draw numbers the script already holds.</li>
+</ul>
+<p>Your own script's arithmetic is yours: the examples' Direct Strength Method equations, for instance, are Python in
+<code>dsm.py</code>, applied to buckling loads from the engine.</p>
+
+<h2 id="choose">How the console picks one<a class="g-anchor" href="#choose" aria-label="Link to this section">#</a></h2>
+<p>MicroPython first, cheapest test first. Full Python is used only when one of these says MicroPython cannot run the
+script.</p>
+<figure class="g-dia">
+<svg viewBox="0 0 440 372" role="img" aria-labelledby="dia2-t dia2-d">
+  <title id="dia2-t">How the console picks a runtime</title>
+  <desc id="dia2-d">Step 1, the import scan: an import MicroPython lacks goes to full Python. Step 2, a compile-only check on MicroPython: a SyntaxError goes to full Python. Step 3, the MicroPython run: if it stops on something MicroPython lacks, the script runs again on full Python. Otherwise the MicroPython run is the result. Before full Python downloads anything, you are asked.</desc>
+  <defs><marker id="dia2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="g-dia-head" d="M0 0L10 5L0 10z"/></marker></defs>
+  <rect class="g-dia-box" x="8" y="8" width="250" height="60" rx="9"/>
+  <text class="g-dia-t" x="133" y="32" text-anchor="middle">1. Import scan</text>
+  <text class="g-dia-s" x="133" y="52" text-anchor="middle">every import on the list?</text>
+  <rect class="g-dia-box" x="8" y="104" width="250" height="60" rx="9"/>
+  <text class="g-dia-t" x="133" y="128" text-anchor="middle">2. Compile check</text>
+  <text class="g-dia-s" x="133" y="148" text-anchor="middle">can MicroPython read it?</text>
+  <rect class="g-dia-box" x="8" y="200" width="250" height="60" rx="9"/>
+  <text class="g-dia-t" x="133" y="224" text-anchor="middle">3. Run on MicroPython</text>
+  <text class="g-dia-s" x="133" y="244" text-anchor="middle">stopped on something it lacks?</text>
+  <rect class="g-dia-box g-dia-py" x="8" y="296" width="250" height="60" rx="9"/>
+  <text class="g-dia-t" x="133" y="320" text-anchor="middle">Result: MicroPython's run</text>
+  <text class="g-dia-s" x="133" y="340" text-anchor="middle">badge: Ran on: MicroPython</text>
+  <rect class="g-dia-box g-dia-rs" x="300" y="104" width="132" height="156" rx="9"/>
+  <text class="g-dia-t" x="366" y="150" text-anchor="middle">Full Python</text>
+  <text class="g-dia-s" x="366" y="172" text-anchor="middle">ask first if it</text>
+  <text class="g-dia-s" x="366" y="188" text-anchor="middle">must download;</text>
+  <text class="g-dia-s" x="366" y="204" text-anchor="middle">run from the</text>
+  <text class="g-dia-s" x="366" y="220" text-anchor="middle">start, one clean</text>
+  <text class="g-dia-s" x="366" y="236" text-anchor="middle">output</text>
+  <path class="g-dia-line" d="M133 68V100" marker-end="url(#dia2-a)"/>
+  <text class="g-dia-s" x="141" y="89">yes</text>
+  <path class="g-dia-line" d="M133 164V196" marker-end="url(#dia2-a)"/>
+  <text class="g-dia-s" x="141" y="185">yes</text>
+  <path class="g-dia-line" d="M133 260V292" marker-end="url(#dia2-a)"/>
+  <text class="g-dia-s" x="141" y="281">no</text>
+  <path class="g-dia-line" d="M258 38H366V100" marker-end="url(#dia2-a)"/>
+  <text class="g-dia-s" x="272" y="32">no</text>
+  <path class="g-dia-line" d="M258 134H296" marker-end="url(#dia2-a)"/>
+  <text class="g-dia-s" x="268" y="128">no</text>
+  <path class="g-dia-line" d="M258 230H296" marker-end="url(#dia2-a)"/>
+  <text class="g-dia-s" x="266" y="224">yes</text>
+</svg>
+<figcaption>MicroPython first; full Python only when a step says it is needed.</figcaption>
+</figure>
+<ol>
+  <li id="scan"><b>The import scan.</b> The console reads the script's <code>import</code> and <code>from … import</code>
+    lines (text in strings and comments is skipped) and checks each top-level module against the list in
+    <a href="#two">the table above</a>. One that is not on it (<code>numpy</code>, <code>scipy</code>,
+    <code>matplotlib</code>, <code>pandas</code>, …) sends the script to full Python.</li>
+  <li id="compile"><b>The compile check.</b> MicroPython compiles the script without running it. A
+    <code>SyntaxError</code> means syntax MicroPython does not have (some f-string forms, <code>match</code>, …), and
+    the script goes to full Python. A typo is a <code>SyntaxError</code> too, so a typo can bring up the download prompt
+    (<a href="faq.html#faq-typo">what to do</a>).</li>
+  <li id="fallback"><b>The runtime fallback.</b> The script runs on MicroPython. If it stops on something MicroPython
+    lacks, it runs again from the start on full Python. That is:
+    <ul>
+      <li>an <code>ImportError</code> (an import the scan could not see, such as one inside a function);</li>
+      <li>the lite package's own refusal, which names the full runtime (an <a href="#arrays"><code>Array</code></a>
+        asked to do numpy arithmetic, <code>ax=</code> on a plot function);</li>
+      <li>a <code>NameError</code> on one of CPython's built-in names that MicroPython does not have;</li>
+      <li>an <code>AttributeError</code> on a module or a built-in type (a function MicroPython's <code>math</code>
+        or <code>str</code> lacks);</li>
+      <li>a <code>TypeError</code> saying a built-in takes no such keyword (<code>json.dumps(x, indent=2)</code>).</li>
+    </ul>
+    The first run's output was held back, so you see one clean output: full Python's. A mistake in the script itself
+    (a wrong argument, an engine <code>ValueError</code>, a <code>NameError</code> on your own name) is not a reason
+    to switch: it is shown as MicroPython's error.</li>
+</ol>
+<p>Once full Python is loaded in the session, a script that needs it runs on it straight away. A script that
+MicroPython can run still runs on MicroPython.</p>
+
+<h2 id="consent">The download prompt<a class="g-anchor" href="#consent" aria-label="Link to this section">#</a></h2>
+<p>Nothing is downloaded without your agreement. When a script needs full Python and some of it is not yet on the
+device, the console stops and asks. The prompt says why (for example <i>It imports numpy, which the console's
+MicroPython does not run</i>), how much this script would download now, and the parts:</p>
+<div class="g-table"><table>
+  <thead><tr><th>Part</th><th>Size</th><th>When</th></tr></thead>
+  <tbody>
+    <tr><td>Python 3.14.2 (Pyodide 314.0.7)</td><td>12.9 MB</td><td>always, the first time</td></tr>
+    <tr><td>numpy</td><td>2.8 MB</td><td>always: the <code>cufsm_rs</code> package needs it</td></tr>
+    <tr><td>matplotlib, with the 11 packages it uses</td><td>9.8 MB</td><td>a script that imports matplotlib or uses <code>cufsm_rs.plot</code></td></tr>
+    <tr><td>scipy</td><td>13.4 MB</td><td>a script that imports scipy</td></tr>
+  </tbody>
+</table></div>
+<p>So a numpy script downloads 15.7 MB the first time, and one with numpy and matplotlib 25.6 MB; everything the
+console hosts is 38.9 MB. (MB here is 1,048,576 bytes, as the prompt counts.) Only what is not already on the
+device is counted, so a later script that adds scipy asks for 13.4 MB. Full Python is fetched from this site, the
+same place as the app, not from a third party: the official Pyodide 314.0.7 release files, pinned by size and
+SHA-256 when the site is built. Other packages of the Pyodide release are not hosted; a script that imports one is
+told so in the prompt, and its import fails on full Python too.</p>
+<ul>
+  <li><span class="ui">Load full Python and run</span> downloads the parts and runs the script on full Python. Starting
+    it takes a few seconds; the status line says what is loading.</li>
+  <li><span class="ui">Not now</span> shows the script's MicroPython run instead: it stops where it needs full Python,
+    with a note and the line marked.</li>
+  <li><span class="ui">Always load it on this device without asking</span>, ticked before Load, skips the prompt from
+    then on, on this device.</li>
+</ul>
+
+<h2 id="always">Always, Remove and offline<a class="g-anchor" href="#always" aria-label="Link to this section">#</a></h2>
+<p>What full Python downloads is kept on the device, in a store of its own beside the app's offline copy. It stays
+when the app updates. After a full Python run, <span class="ui">Remove full Python from this device</span> appears
+under the output: it deletes that copy and the "always" choice, and the next script that needs full Python asks
+again.</p>
+<p>Offline, full Python works with what is already on the device: a numpy and matplotlib script that has run once
+online runs again offline, with the same output. A script that needs a package not yet downloaded (scipy, say) needs
+the network for it. MicroPython needs nothing extra: it is part of the app's offline copy.</p>
+
+<h2 id="badge">The runtime badge<a class="g-anchor" href="#badge" aria-label="Link to this section">#</a></h2>
+<p>Every run says which Python ran it, in the badge above the output:</p>
+<ul>
+  <li><span class="ui">Ran on: MicroPython</span>;</li>
+  <li><span class="ui">Ran on: full Python (Pyodide)</span>, with a line saying why, for example
+    <i>Full Python ran this script: it imports numpy.</i> or <i>Full Python ran this script: MicroPython stopped at
+    line 12 (AttributeError: …).</i>;</li>
+  <li>after <span class="ui">Not now</span>: <span class="ui">Ran on: MicroPython</span>, with <i>Not run on full
+    Python (you chose Not now): … This is MicroPython's run.</i></li>
+</ul>
+
+<h2 id="compat">One-way compatibility<a class="g-anchor" href="#compat" aria-label="Link to this section">#</a></h2>
+<p>A script that runs on the console's MicroPython runs unchanged on full Python, and on CPython after
+<code>pip install cufsm-rs-py</code> (with <code>[plot]</code> if it plots, and <code>dsm.py</code> beside it if it
+imports <code>dsm</code>). The reverse does not hold: a numpy or scipy script does not run on MicroPython. To write a
+script that runs everywhere:</p>
+<ul>
+  <li>index results as <code>a[i][j]</code>, not <code>a[i, j]</code> or <code>a[:, k]</code>;</li>
+  <li>use loops or list comprehensions instead of whole-array arithmetic (<code>[2 * v for v in r.curve]</code>, not
+    <code>2 * r.curve</code>);</li>
+  <li>use <code>len(a)</code>, <code>list(a)</code> or <code>a.tolist()</code>, not <code>a.min()</code> or
+    <code>a.max()</code>: <code>min(r.curve)</code> works on both;</li>
+  <li>call the plot functions without <code>ax=</code>, and do not use what they return;</li>
+  <li>keep to the modules in <a href="#two">MicroPython's list</a>.</li>
+</ul>
+<p>To tell the runtimes apart in a script: the lite package has <code>cufsm_rs.__lite__ = True</code>, and the
+published package has no such attribute (<code>getattr(cufsm_rs, "__lite__", False)</code>).</p>
+
+<h2 id="arrays">Why results are <code>Array</code> objects in MicroPython<a class="g-anchor" href="#arrays" aria-label="Link to this section">#</a></h2>
+<p>MicroPython has no numpy, so where the package returns a numpy array the lite package returns an
+<code>Array</code>: nested lists with the same shape and the same indexing. <code>a[i]</code> (a row, itself an
+<code>Array</code>, or a number), <code>a[i][j]</code>, negative indices, slices, <code>len(a)</code>, iteration,
+<code>a.shape</code>, <code>a.ndim</code>, <code>a.tolist()</code> and <code>list(a)</code> all work as on the
+package's arrays, and <code>a[i] = v</code> or <code>a[i][j] = v</code> writes through, as numpy's views do.</p>
+<p>It is deliberately not a <code>list</code>. On a list, <code>a * 2</code> repeats the list and <code>a + b</code>
+joins two lists, where numpy multiplies and adds: a script written for numpy would give a different answer without
+any error. So an <code>Array</code> refuses whole-array arithmetic, comparisons, <code>a[i, j]</code> and the array
+methods, with an error that names the full runtime; and that error is one the console's
+<a href="#fallback">fallback</a> acts on, so such a script moves to full Python rather than failing.</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+r = fsm.signature(fsm.stress(fsm.lipped_c(150, 64, 15, 1.5), P=1.0), [50.0, 100.0, 200.0])
+print(r.load_factors.shape)          # (3, 1)
+print(r.load_factors[1][0])          # a number: works on both runtimes
+print(min(r.curve))                  # works on both
+print([2 * v for v in r.curve])      # works on both
+# r.curve * 2   on MicroPython: NotImplementedError naming the full runtime (numpy multiplies)</code></pre>
+
+<h2 id="numbers">The same numbers<a class="g-anchor" href="#numbers" aria-label="Link to this section">#</a></h2>
+<p>Both runtimes call the same <code>cufsm.wasm</code>, and numbers cross between Python and the engine bit for bit,
+so MicroPython and full Python get the same results to the last bit. The parity suite runs the five MicroPython
+examples on both and finds no difference. What can differ is the <i>printing</i>: MicroPython's float formatting is
+not correctly rounded, so a printed number can differ in its last digits (<a href="faq.html#faq-digits">FAQ</a>).</p>
+<p>Against <code>pip install cufsm-rs-py</code> on your own machine, the console's results agree to a relative
+1e-9 in the cases the parity suite checks (cufsm-rs-py 0.1.0; every example, the README quickstart, and several
+hundred individual calls). The exceptions are known and come from the maths library, not the engine's code: the
+browser's engine uses Rust's own sine, cosine and arctangent, and the native package uses the operating system's.
+A last-bit difference there is amplified where the problem is ill-conditioned: load factors and modes at
+half-wavelengths of very many times the widest strip, and the cFSM classification of an unsymmetric section. There
+the two can differ by up to about 1e-4 relative (at a half-wavelength of a thousand times the widest strip); elsewhere the
+difference is much smaller.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="console.html"><small>Previous</small>‹ The Python console</a>
+    <a class="next" href="python-api.html"><small>Next</small>Python API reference ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

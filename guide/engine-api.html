@@ -1,0 +1,296 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Engine API (Rust / wasm) · CivilKit Buckling guide</title>
+<meta name="description" content="The C interface of cufsm-rs, the Rust engine compiled to cufsm.wasm: the ABI version, memory conventions, buffer layouts and every export, for calling the engine from JavaScript or C.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html" aria-current="page"><span class="g-num">13</span> Engine API (Rust / wasm)</a>
+      <ul>
+        <li><a href="#crate">The crate and its builds</a></li>
+        <li><a href="#abi">ABI version</a></li>
+        <li><a href="#memory">Memory and calls</a></li>
+        <li><a href="#layouts">Model buffers</a></li>
+        <li><a href="#exports">Exports</a></li>
+        <li><a href="#minor1">Added in minor 1</a></li>
+        <li><a href="#js">Calling it from JavaScript</a></li>
+      </ul></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Engine API (Rust / wasm)</h1>
+<p class="g-lede">For people calling the engine directly: the C interface of <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>,
+the Rust port of CUFSM, which <code>cufsm.wasm</code> exports. The app, the extensions' capabilities, the Python
+console and the <code>cufsm-rs-py</code> package are all built on this engine.</p>
+
+<h2 id="crate">The crate and its builds<a class="g-anchor" href="#crate" aria-label="Link to this section">#</a></h2>
+<p><a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a> (on crates.io as
+<a href="https://crates.io/crates/cufsm-rs"><code>cufsm-rs</code></a>) is a dependency-free Rust port of CUFSM by
+B.W. Schafer and co-workers, with constrained FSM (cFSM) after Ádány and Schafer. It is tested against CUFSM's own
+MATLAB code run under Octave. It has three users here:</p>
+<ul>
+  <li><b><code>cufsm.wasm</code></b>, the crate with its <code>ffi</code> feature compiled to WebAssembly: what the app,
+    the extension capabilities and both of the console's Pythons call. This page is its interface. The app's copy is
+    built from cufsm-rs 0.4.2.</li>
+  <li><b>cufsm-rs-py</b> (<code>pip install cufsm-rs-py</code>), the crate compiled as a native CPython extension, with
+    the Python layer the <a href="python-api.html">Python API reference</a> documents.</li>
+  <li><b>Rust programs</b>, which use the crate's Rust API directly (see its README); the C interface is off unless
+    the <code>ffi</code> feature is turned on.</li>
+</ul>
+<p>Build the module from the crate's source with:</p>
+<pre><code>cargo rustc --release --lib --features ffi --crate-type cdylib --target wasm32-unknown-unknown</code></pre>
+
+<h2 id="abi">ABI version<a class="g-anchor" href="#abi" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Export</th><th>Returns</th></tr></thead>
+  <tbody>
+    <tr><td id="abi-cufsm_abi_version"><code>cufsm_abi_version() → u32</code></td><td><b>2</b>: the buffer layouts' version. It changes only when an existing export's layout changes.</td></tr>
+    <tr><td id="abi-cufsm_abi_minor"><code>cufsm_abi_minor() → u32</code></td><td><b>1</b>: which exports have been added within version 2, leaving every earlier layout as it was. A module without this export is minor 0.</td></tr>
+  </tbody>
+</table></div>
+<p>Refuse a module whose version is not the one you built for. If you need the <a href="#minor1">minor 1 exports</a>,
+also refuse a minor below 1; the app does both.</p>
+
+<h2 id="memory">Memory and calls<a class="g-anchor" href="#memory" aria-label="Link to this section">#</a></h2>
+<p>Everything crosses the boundary as flat buffers in the module's linear memory. There is no binding library.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Export</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td id="abi-cufsm_alloc"><code>cufsm_alloc(n: usize) → *mut u8</code></td><td><code>n</code> bytes of 8-aligned memory for you to fill; null (0) when the memory cannot be had.</td></tr>
+    <tr><td id="abi-cufsm_dealloc"><code>cufsm_dealloc(p: *mut u8, n: usize)</code></td><td>Frees a block from <code>cufsm_alloc</code>; <code>n</code> must be the byte count you allocated it with. Never free a block twice.</td></tr>
+    <tr><td id="abi-cufsm_last_error_ptr"><code>cufsm_last_error_ptr() → usize</code></td><td>Pointer to the last error message's UTF-8 bytes (0 when there has been none).</td></tr>
+    <tr><td id="abi-cufsm_last_error_len"><code>cufsm_last_error_len() → usize</code></td><td>Its length in bytes.</td></tr>
+  </tbody>
+</table></div>
+<p>The conventions every analysis export follows:</p>
+<ul>
+  <li><b>Buffers are little-endian <code>f64</code></b>, except the boundary condition, which is UTF-8 bytes. Each
+    buffer pointer is followed by its length, counted in values (in bytes for the boundary condition).</li>
+  <li><b>The last two arguments are <code>out</code> and <code>out_cap</code></b>: a buffer you allocated for the
+    result, and how many <code>f64</code> it holds. An export checks that the result fits before any work, and fails
+    with <code>output buffer is too small: N values needed, M given</code> otherwise.</li>
+  <li><b>The return value</b> is the number of <code>f64</code> written, or <b>-1</b> on failure, when
+    <code>cufsm_last_error_ptr</code> and <code>cufsm_last_error_len</code> hold the message (valid until the next
+    failing call; one slot per process, so native callers on several threads must serialise).</li>
+  <li><b>Every input is checked</b> (shapes, finite numbers, node and material indices, flags) and refused with a
+    message, as CUFSM's model checks are. A panic inside the analysis is caught and reported the same way natively; on
+    <code>wasm32-unknown-unknown</code>, which aborts on a panic, it traps instead (a <code>RuntimeError</code> in JavaScript).</li>
+  <li><b>No fixed caps</b> on longitudinal terms or eigenvalues: memory is the limit. The analysis holds dense
+    matrices of <code>(4 × nodes × nterms)²</code> values; a size the platform cannot even address is refused with a
+    message.</li>
+</ul>
+
+<h2 id="layouts">Model buffers<a class="g-anchor" href="#layouts" aria-label="Link to this section">#</a></h2>
+<p>The engine's own layouts are <b>0-based</b> and differ from CUFSM's tables (which the
+<a href="python-api.html#tables">Python package</a> uses): no row numbers, and materials referred to by row.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Buffer</th><th>Values per row</th><th>Columns</th></tr></thead>
+  <tbody>
+    <tr><td><code>mats</code></td><td>5</td><td><code>ex, ey, vx, vy, g</code>. Ex, Ey and G positive, vx·vy below 1.</td></tr>
+    <tr><td><code>nodes</code></td><td>7</td><td><code>x, z, free_x, free_z, free_y, free_q, stress</code>: CUFSM's node columns without the number; each free flag 0 or 1; stress is the reference stress, positive in compression.</td></tr>
+    <tr><td><code>elems</code></td><td>4</td><td><code>node_i, node_j, t, mat</code>: 0-based node rows, thickness above 0, 0-based material row.</td></tr>
+    <tr><td><code>springs</code></td><td>9 (length 0 for none)</td><td><code>node_i, node_j, k_u, k_v, k_w, k_q, local, discrete, ys_fraction</code>: <code>node_j</code> -1 for ground; <code>local</code> and <code>discrete</code> 0 or 1; a discrete spring acts at <code>ys_fraction</code> of the length (CUFSM v4.3's springs row).</td></tr>
+    <tr><td><code>constraints</code></td><td>5 (length 0 for none)</td><td><code>node_e, dof_e, coeff, node_k, dof_k</code>, reading <code>u_e = coeff · u_k</code>; DOF codes 1 x, 2 z, 3 y along the member, 4 θ.</td></tr>
+    <tr><td><code>bc</code></td><td>bytes</td><td><code>S-S</code>, <code>C-C</code>, <code>S-C</code>, <code>C-F</code> or <code>C-G</code> (also <code>C-S</code>, <code>F-C</code>, <code>G-C</code>). Exact case, except in <code>cufsm_strip</code> and <code>cufsm_classify</code>, which take lower case too.</td></tr>
+    <tr><td><code>lengths</code></td><td>1</td><td>Each positive and finite. With S-S and one term they are half-wavelengths (the signature curve); otherwise member lengths.</td></tr>
+  </tbody>
+</table></div>
+<p>Mode vectors (<code>dofs</code>) are in CUFSM's order: per longitudinal term, <code>4 × nodes</code> values,
+<code>u</code> and <code>v</code> interleaved for every node, then <code>w</code> and <code>θ</code> interleaved; scaled
+so the largest entry is 1. In the output layouts below, λ is a load factor (a multiplier on the nodes' reference
+stresses) and G, D, L, O are cFSM percentages.</p>
+
+<h2 id="exports">Exports<a class="g-anchor" href="#exports" aria-label="Link to this section">#</a></h2>
+<p>Arguments are listed in order; <code>…_len</code> follows each buffer and is omitted below.
+<code>(model)</code> stands for <code>mats, nodes, elems</code>.</p>
+
+<h3 id="abi-cufsm_signature"><code>cufsm_signature</code><a class="g-anchor" href="#abi-cufsm_signature" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_signature(params, (model), bc, lengths, springs, constraints, out, out_cap) → isize</code></pre>
+<p><code>params</code> = <code>[terms, spaces, neigs]</code>: <code>terms</code> 1 or more (the terms 1..terms at every
+length), <code>spaces</code> 0 to 15 (bits 1 G, 2 D, 4 L, 8 O: the constrained curves wanted), <code>neigs</code> 1 or
+more (checked, but only the lowest mode is solved). Output: one row of <code>2 + popcount(spaces)</code> values per
+length, in input order: <code>L, λ</code>, then one column per requested space in G, D, L, O order, each from a run
+restricted to that space alone. A length with no positive load factor writes NaN.</p>
+
+<h3 id="abi-cufsm_modes"><code>cufsm_modes</code><a class="g-anchor" href="#abi-cufsm_modes" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_modes(params, (model), bc, lengths, springs, constraints, out, out_cap) → isize</code></pre>
+<p><code>params</code> as <code>cufsm_signature</code> (<code>spaces</code> unused). Output per length, a row of
+<code>2 + nterms + neigs × (5 + 4 × nodes × nterms)</code> values: <code>found, nterms</code>, the terms
+<code>m_1 … m_nterms</code>, then <code>neigs</code> blocks of <code>λ, G, D, L, O</code> and the
+<code>4 × nodes × nterms</code> dofs. Blocks past <code>found</code> are NaN. G, D, L, O are CUFSM's default
+classification (axial, vector, ST).</p>
+
+<h3 id="abi-cufsm_props"><code>cufsm_props</code><a class="g-anchor" href="#abi-cufsm_props" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_props((model), out, out_cap) → isize</code></pre>
+<p>Gross and warping section properties. Output, 15 values: <code>A, xcg, zcg, Ixx, Izz, Ixz, thetap (degrees), I11,
+I22, J, xs, zs, Cw, B1, B2</code>.</p>
+
+<h3 id="abi-cufsm_stresgen"><code>cufsm_stresgen</code><a class="g-anchor" href="#abi-cufsm_stresgen" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_stresgen((model), actions, out, out_cap) → isize</code></pre>
+<p><code>actions</code> = <code>[P, Mxx, Mzz, M11, M22, B, restrained]</code>, <code>restrained</code> 0 or 1. Output:
+one reference stress per node. The nodes' own stress column is ignored.</p>
+
+<h3 id="abi-cufsm_yield"><code>cufsm_yield</code><a class="g-anchor" href="#abi-cufsm_yield" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_yield((model), args, out, out_cap) → isize</code></pre>
+<p><code>args</code> = <code>[fy, restrained, extreme_fibre]</code>, both flags 0 or 1 (<code>extreme_fibre</code> 1
+checks the element faces, 0 the centreline). Output, 6 values: <code>Py, Mxx, Mzz, M11, M22, By</code>.</p>
+
+<h3 id="abi-cufsm_stress_to_action"><code>cufsm_stress_to_action</code><a class="g-anchor" href="#abi-cufsm_stress_to_action" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_stress_to_action((model), out, out_cap) → isize</code></pre>
+<p>Actions fitted by least squares to the nodes' stress column. Output, 5 values: <code>P, M11, M22, B, err</code>.</p>
+
+<h3 id="abi-cufsm_ftm"><code>cufsm_ftm</code><a class="g-anchor" href="#abi-cufsm_ftm" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_ftm(params, terms, out, out_cap) → isize</code></pre>
+<p>The finite tube method on one circular tube (the app's Tube view). <code>params</code> = <code>[R, t, L, E, nu, N, M,
+T, V, base, top, p, nmodes, nth, ny]</code>: radius, thickness, length, modulus, Poisson's ratio; the actions in N and
+N·mm (compression, and the moment's compression side at θ = 0, positive); <code>base</code> and <code>top</code> ends
+0 free edge, 1 pinned, 2 clamped, 3 free with a stiff ring; <code>p</code> circumferential harmonics (1 to 80);
+<code>nmodes</code> 1 to 20; <code>nth</code> (4 to 720) by <code>ny</code> (2 to 720) grid points. <code>terms</code>:
+the longitudinal wave numbers (1 to 10,000). Output: <code>modes found, unknowns, σN, σM, τT, τV</code> (the reference
+stresses), then per mode <code>λ, circumferential waves</code> and its <code>(u, v, w)</code> at each grid point
+(θ = 2πi/nth, y = L·j/(ny − 1), θ outer), scaled so the largest coefficient is 1. <code>out</code> must hold
+<code>6 + nmodes × (2 + 3 × nth × ny)</code> values.</p>
+
+<h2 id="minor1">Added in minor 1<a class="g-anchor" href="#minor1" aria-label="Link to this section">#</a></h2>
+<p>These exist so a script written for the Python package can run on the same engine. Every layout above is unchanged.</p>
+
+<h3 id="abi-cufsm_strip"><code>cufsm_strip</code><a class="g-anchor" href="#abi-cufsm_strip" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_strip(params, (model), bc, lengths, m_all, springs, constraints, out, out_cap) → isize</code></pre>
+<p><code>params</code> = <code>[terms, spaces, neigs, classify]</code> (exactly 4). With <code>m_all</code> empty
+(length 0), every length takes the terms <code>1..terms</code>, as <code>cufsm_modes</code>. Otherwise
+<code>terms</code> must be 0 and <code>m_all</code> holds one list per length, each its count then its terms:
+<code>[n_1, m…, n_2, m…, …]</code>, any finite values with at least one non-zero (sorted, zeros and repeats dropped, as
+CUFSM's <code>msort</code>). <code>spaces</code> 0 is the free analysis; otherwise its bits together are <b>one</b>
+cFSM space the analysis is restricted to (unlike <code>cufsm_signature</code>, where each bit is its own column).
+<code>classify</code> 1 writes the default classification, 0 writes NaN there and skips the work. Output: one
+<code>cufsm_modes</code> row per length, back to back, each sized by its own <code>nterms</code> (after msort). With
+<code>[terms, 0, neigs, 1]</code> and no <code>m_all</code> it equals <code>cufsm_modes</code>, value for value.</p>
+
+<h3 id="abi-cufsm_classify"><code>cufsm_classify</code><a class="g-anchor" href="#abi-cufsm_classify" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_classify(params, (model), bc, results, springs, constraints, out, out_cap) → isize</code></pre>
+<p><code>params</code> = <code>[orth, norm, ospace]</code> in CUFSM's codes: <code>orth</code> 1 natural, 2 axial, 3 load;
+<code>norm</code> 0 none, 1 vector, 2 strain energy, 3 work; <code>ospace</code> 1 ST, 2 K⁻¹, 3 Kg⁻¹, 4 the null space.
+CUFSM's defaults are 2, 1, 1. <code>orth</code> 3 reads the nodes' stress column. <code>results</code> holds, per
+length, <code>L, nterms, m_1 … m_nterms, k</code>, then <code>k</code> modes of <code>4 × nodes × nterms</code> dofs.
+Output: <code>G, D, L, O</code> percent per mode, in order: <code>4 × (total modes)</code> values.</p>
+
+<h3 id="abi-cufsm_template"><code>cufsm_template</code><a class="g-anchor" href="#abi-cufsm_template" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_template(params, out, out_cap) → isize</code></pre>
+<p><code>params</code>: the 23 values of CUFSM's <code>templatecalc</code>: <code>shape</code> (1 C, 2 Z), <code>h, b1,
+b2, d1, d2, r1, r2, r3, r4, q1, q2, t, nh, nb1, nb2, nd1, nd2, nr1, nr2, nr3, nr4, centerline</code>. <code>h</code>,
+<code>b1</code>, <code>b2</code>, <code>t</code> positive; lips and radii zero or positive; <code>q</code> in degrees;
+strip counts whole (<code>nh</code>, <code>nb1</code>, <code>nb2</code> at least 1); <code>centerline</code> 1, or 0
+for outside dimensions and inside radii. Output: <code>nnodes, nelems</code>, then the nodes (7 values each) and
+elements (4 each) in this interface's own layouts, 0-based, every node free, stress 1, material 0: ready to pass back
+in. <code>out</code> must hold <code>2 + 7 × (s + 1) + 4 × s</code> values, s the sum of the nine strip counts.</p>
+
+<h3 id="abi-cufsm_props_wn"><code>cufsm_props_wn</code><a class="g-anchor" href="#abi-cufsm_props_wn" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_props_wn((model), out, out_cap) → isize</code></pre>
+<p><code>cufsm_props</code>' 15 values, then the warping function <code>wn</code> at each node: <code>15 + nodes</code>
+values.</p>
+
+<h3 id="abi-cufsm_signature_lengths"><code>cufsm_signature_lengths</code><a class="g-anchor" href="#abi-cufsm_signature_lengths" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_signature_lengths((model), out, out_cap) → isize</code></pre>
+<p>The 100 half-wavelengths of CUFSM's <code>signature_ss.m</code> for the model.</p>
+
+<h3 id="abi-cufsm_signature_minima"><code>cufsm_signature_minima</code><a class="g-anchor" href="#abi-cufsm_signature_minima" aria-label="Link to this section">#</a></h3>
+<pre><code>cufsm_signature_minima(curve, out, out_cap) → isize</code></pre>
+<p><code>curve</code>: <code>L, λ</code> pairs (a NaN λ marks a length with no positive load factor; lengths positive,
+λ not infinite). Output: <code>L, λ</code> per interior local minimum, shortest first, refined by a parabola in log
+length: at most <code>curve_len − 4</code> values.</p>
+
+<h2 id="js">Calling it from JavaScript<a class="g-anchor" href="#js" aria-label="Link to this section">#</a></h2>
+<p>The whole glue is <code>WebAssembly.instantiate</code> and typed arrays over the module's memory: allocate each
+input, write it, call, copy the output out, and free everything on every path. The app's own wrapper does exactly this.
+This example reads the section properties of a 100 × 50 × 2 mm channel (centreline dimensions, mm and MPa) in a browser
+module or in Node:</p>
+<pre><code>const bytes = await (await fetch('cufsm.wasm')).arrayBuffer();   // Node: fs.readFileSync('cufsm.wasm')
+const { instance } = await WebAssembly.instantiate(bytes, {});
+const e = instance.exports;
+if (e.cufsm_abi_version() !== 2) throw new Error('not ABI 2');
+
+const mats = [200000, 200000, 0.3, 0.3, 200000 / 2.6];                // ex, ey, vx, vy, g
+const nodes = [[50, 0], [0, 0], [0, 50], [0, 100], [50, 100]]
+  .flatMap(([x, z]) => [x, z, 1, 1, 1, 1, 1]);                        // x, z, four free flags, stress
+const elems = [0, 1, 2, 3].flatMap((k) => [k, k + 1, 2, 0]);          // node_i, node_j, t, mat
+
+const held = [];
+const put = (values) => {                                             // an f64 buffer in the module
+  const p = e.cufsm_alloc(values.length * 8);
+  if (!p) throw new Error('out of memory');
+  held.push([p, values.length * 8]);
+  new Float64Array(e.memory.buffer, p, values.length).set(values);
+  return p;
+};
+try {
+  const args = [mats, nodes, elems].flatMap((v) => [put(v), v.length]);  // each pointer, then its length
+  const cap = 15;
+  const out = e.cufsm_alloc(cap * 8);
+  held.push([out, cap * 8]);
+  const n = e.cufsm_props(...args, out, cap);
+  if (n &lt; 0) {
+    const msg = new Uint8Array(e.memory.buffer, e.cufsm_last_error_ptr(), e.cufsm_last_error_len());
+    throw new Error(new TextDecoder().decode(msg));
+  }
+  const [A, xcg, zcg, Ixx] = new Float64Array(e.memory.buffer, out, n);  // read before the next call
+  console.log({ A, xcg, zcg, Ixx });
+} finally {
+  for (const [p, size] of held) e.cufsm_dealloc(p, size);
+}</code></pre>
+<p>Read the output before the next call: a call can grow the module's memory, which replaces
+<code>e.memory.buffer</code> and detaches views made earlier. From C, link the crate built natively with the
+<code>ffi</code> feature and call the same functions; the signatures are in the crate's <code>src/ffi.rs</code>, which
+also documents every layout.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="examples.html"><small>Previous</small>‹ Python examples</a>
+    <a class="next" href="faq.html"><small>Next</small>Troubleshooting and FAQ ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

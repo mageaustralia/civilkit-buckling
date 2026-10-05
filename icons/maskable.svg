@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- the maskable icon: full bleed, the mark well inside the 80 % safe circle -->
+  <rect width="512" height="512" fill="#1c2330"/>
+  <g transform="translate(256 256) scale(0.8) translate(-256 -256)">
+  <path d="M336 196V136H176V376H336V316" fill="none" stroke="#cfcac0" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="#34c4a8"><circle cx="336" cy="196" r="19"/><circle cx="336" cy="136" r="19"/><circle cx="176" cy="136" r="19"/><circle cx="176" cy="256" r="19"/><circle cx="176" cy="376" r="19"/><circle cx="336" cy="376" r="19"/><circle cx="336" cy="316" r="19"/></g>
+  </g>
+</svg>

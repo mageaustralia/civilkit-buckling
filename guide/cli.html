@@ -1,0 +1,234 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>The ckext command line · CivilKit Buckling guide</title>
+<meta name="description" content="tools/ckext.mjs packs a module folder into a .ckext and tests it with no browser: the same MicroPython runtime and the same cufsm-rs engine as the app's sandbox, under Node. It is the loop an author, a reviewer or a CI job runs.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html" aria-current="page"><span class="g-num">7</span> The ckext command line</a>
+      <ul>
+        <li><a href="#setup">Setting up</a></li>
+        <li><a href="#pack">pack</a></li>
+        <li><a href="#test">test</a></li>
+        <li><a href="#loop">The loop</a></li>
+        <li><a href="#store">Building the store</a></li>
+      </ul></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">The ckext command line</h1>
+<p class="g-lede"><code>tools/ckext.mjs</code> packs a module folder into a <code>.ckext</code> and tests it with no
+browser: the same MicroPython runtime and the same cufsm-rs engine as the app's sandbox, under Node. It is the loop an
+author, a reviewer or a CI job runs.</p>
+
+<h2 id="setup">Setting up<a class="g-anchor" href="#setup" aria-label="Link to this section">#</a></h2>
+<p>You need Node 20 or later and a checkout of CivilKit Buckling's source. The tool has no dependencies of its own beyond
+what is committed (the engine <code>cufsm.wasm</code> and <code>vendor/civilkit</code>):</p>
+<pre><code>cd civilkit-buckling
+node tools/ckext.mjs test extensions/dsm-compression</code></pre>
+<p><code>npm run ckext -- test …</code> runs the same. Paths are relative to where you run it.</p>
+
+<h2 id="pack">pack<a class="g-anchor" href="#pack" aria-label="Link to this section">#</a></h2>
+<pre><code>node tools/ckext.mjs pack &lt;folder&gt; [-o out.ckext]</code></pre>
+<p>Zips <code>manifest.json</code>, <code>main.py</code> and everything under <code>tests/</code> from the folder, checks
+the result exactly as the app's installer does (the manifest's required fields, a semantic version, a
+<code>buckling.tool</code> contribution, a <code>main.py</code>), and writes it. With no <code>-o</code> the file is named
+after the folder, in the current directory.</p>
+<pre><code>$ node tools/ckext.mjs pack squash-load -o squash-load.ckext
+packed yourname.squash-load 1.0.0 -&gt; squash-load.ckext (1467 bytes)</code></pre>
+<p>A bundle that would not install is not written; the error names why (see <a href="faq.html#install-errors">install
+errors</a>). Other files in the folder, such as a README, are not packed.</p>
+
+<h2 id="test">test<a class="g-anchor" href="#test" aria-label="Link to this section">#</a></h2>
+<pre><code>node tools/ckext.mjs test &lt;file.ckext | folder&gt; [--inputs '{"fy":450}'] [--model model.json] [--json]</code></pre>
+<p>It does four things, in order:</p>
+<ol>
+  <li>runs every <a href="worked-examples.html">worked example</a>, which decides the badge;</li>
+  <li>calls <code>build_ui({}, [], [])</code> and lists the form's fields and buttons;</li>
+  <li>runs <code>check</code> once: on the first example's inputs and fixture by default, on <code>--inputs</code> if
+    given, against the model in <code>--model</code> if given (a JSON file in the
+    <a href="capabilities.html#model">model shape</a>);</li>
+  <li>reports which capabilities were declared, which were used, and any called without being declared.</li>
+</ol>
+<p>A folder is packed in memory first, so testing a folder and testing its packed file give the same answer.</p>
+<pre><code>$ node tools/ckext.mjs test squash-load
+verified
+Squash load 1.0.0 (yourname.squash-load)
+worked examples: 1 of 1 pass
+  pass lipped-c-150-60-40
+form: fy; buttons: Run
+run on {"fy":450} (the first worked example and its fixture):
+  Py = 236.25 kN
+    Squash load: Py = A fy = 236.25 kN
+capabilities: declared firstYield; used firstYield
+The run used the first worked example and its fixture, which is never solved, so hasResults is false and getResults is empty. Pass --model (and --inputs) to run on another model.</code></pre>
+<p>The first line is the badge. A failing example prints <code>FAIL</code> and its diffs under it; a run that stops
+prints <code>error:</code> and the message (a Python error with its <code>main.py</code> line); calc lines are indented
+under the results, with their clause in brackets; proposals print as <code>proposal: 25 nodes, 24 elements</code> or
+<code>proposal: refused: ‹reason›</code>; <code>civilkit.log</code> messages as <code>log:</code>; and anything the module
+printed under <code>stdout:</code>. Numbers are shown to 12 significant figures.</p>
+
+<h3 id="json">--json<a class="g-anchor" href="#json" aria-label="Link to this section">#</a></h3>
+<p>Prints the same report as JSON, the shape CivilKit Studio's <code>run_extension</code> returns:</p>
+<pre class="g-long"><code>{
+  "id": "yourname.squash-load",
+  "name": "Squash load",
+  "version": "1.0.0",
+  "badge": "verified",
+  "examples": [
+    {
+      "id": "lipped-c-150-60-40",
+      "pass": true,
+      "diffs": [],
+      "source": "Hand calc: lipped C 150 x 60 x 40 mm (centreline), t = 1.5 mm, sharp corners. A = (150 + 2 x 60 + 2 x 40) x 1.5 = 525 mm2; Py = A fy = 525 x 450 = 236 250 N = 236.25 kN."
+    }
+  ],
+  "form": {
+    "title": "Squash load",
+    "fields": [
+      {
+        "id": "fy",
+        "label": "fy (MPa)",
+        "inputType": "number",
+        "default": 450
+      }
+    ],
+    "buttons": [
+      {
+        "id": "run",
+        "label": "Run",
+        "action": "run-check"
+      }
+    ]
+  },
+  "run": {
+    "inputs": {
+      "fy": 450
+    },
+    "fixture": true,
+    "result": [
+      {
+        "unit": "kN",
+        "label": "Py",
+        "value": 236.25
+      }
+    ],
+    "calcLines": [
+      {
+        "eq": "Py = A fy = 236.25 kN",
+        "label": "Squash load"
+      }
+    ],
+    "proposals": [],
+    "logs": [],
+    "error": null
+  },
+  "capabilities": {
+    "declared": [
+      "firstYield"
+    ],
+    "used": [
+      "firstYield"
+    ],
+    "undeclaredCalls": [],
+    "unusedInThisRun": []
+  },
+  "note": "The run used the first worked example and its fixture, which is never solved, so hasResults is false and getResults is empty. Pass --model (and --inputs) to run on another model."
+}</code></pre>
+<div class="g-table"><table>
+  <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>badge</code></td><td><code>"verified"</code> or <code>"community"</code>.</td></tr>
+    <tr><td><code>examples[]</code></td><td>Each example's <code>id</code>, <code>pass</code>, <code>diffs</code> and <code>source</code>.</td></tr>
+    <tr><td><code>form</code></td><td>The title, fields (<code>id</code>, <code>label</code>, <code>inputType</code>, <code>default</code>) and buttons; <code>{"error": …}</code> when <code>build_ui</code> failed.</td></tr>
+    <tr><td><code>run</code></td><td>The one check: its <code>inputs</code>, whether it ran on the first example's <code>fixture</code>, and its <code>result</code>, <code>calcLines</code>, <code>proposals</code>, <code>logs</code> and <code>error</code>.</td></tr>
+    <tr><td><code>capabilities</code></td><td><code>declared</code>; <code>used</code> (anywhere: examples and run); <code>undeclaredCalls</code>; <code>unusedInThisRun</code>, the declared ones the single run did not call.</td></tr>
+    <tr><td><code>note</code></td><td>Set when the run used a fixture, which is never solved, so the results capabilities show unused there.</td></tr>
+  </tbody>
+</table></div>
+
+<h3 id="exit">Exit codes<a class="g-anchor" href="#exit" aria-label="Link to this section">#</a></h3>
+<div class="g-table"><table>
+  <thead><tr><th>Code</th><th>When</th></tr></thead>
+  <tbody>
+    <tr><td><code>0</code></td><td>Verified, and no capability was called without being declared.</td></tr>
+    <tr><td><code>1</code></td><td>Community, an undeclared call, or a bundle that cannot be read.</td></tr>
+    <tr><td><code>2</code></td><td>A usage error: no command, an unknown option, <code>--inputs</code> that is not JSON. The usage is printed.</td></tr>
+  </tbody>
+</table></div>
+<p>So <code>node tools/ckext.mjs test my-module &amp;&amp; echo ok</code> is a complete CI gate.</p>
+
+<h2 id="loop">The loop<a class="g-anchor" href="#loop" aria-label="Link to this section">#</a></h2>
+<ol>
+  <li>Write the three files, with at least one worked example and its cited source.</li>
+  <li><code>node tools/ckext.mjs test my-module</code>, and read the diffs and the error.</li>
+  <li>Fix, and repeat until the first line is <code>verified</code> and nothing is listed under
+    <code>called without declaring</code>.</li>
+  <li>Run it on another section: <code>--model</code> with a model JSON (copy one out of a fixture), and
+    <code>--inputs</code>.</li>
+  <li><code>pack</code> it, install it in the app, and hand it to a reviewer with its README.</li>
+</ol>
+<p>The same loop works for an AI agent: give it this guide, ask for a module, and run <code>test</code> on what it
+writes.</p>
+
+<h2 id="store">Building the store<a class="g-anchor" href="#store" aria-label="Link to this section">#</a></h2>
+<pre><code>node tools/build-store.mjs</code></pre>
+<p>Packs every folder under <code>extensions/</code> into <code>store/&lt;id&gt;.ckext</code>, tests each with the command
+above, and writes <code>store/index.json</code> (<code>[{ "id", "name", "version", "description", "url" }]</code>) listing
+<b>only the Verified ones</b>. A module that is not Verified is left out and named, and the script exits 1:</p>
+<pre><code>store: 3 module(s): civilkit.dsm-compression 1.0.0, civilkit.section-rounded-cz 1.0.0, civilkit.thickness-study 1.0.0</code></pre>
+<p>Re-run it after changing a module, and commit <code>store/</code> with the change. The app's Extensions list reads
+<code>store/index.json</code> from the site, so the store is whatever was committed and deployed.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="worked-examples.html"><small>Previous</small>‹ Worked examples and the badge</a>
+    <a class="next" href="reference-modules.html"><small>Next</small>Reference modules ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

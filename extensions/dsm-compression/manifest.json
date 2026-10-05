@@ -1,0 +1,11 @@
+{
+  "id": "civilkit.dsm-compression",
+  "name": "DSM compression",
+  "version": "1.0.0",
+  "civilkitApi": "^1.0",
+  "description": "Direct Strength Method column strength (AISI S100 / AS/NZS 4600): Pne, Pnl, Pnd and Pn from the section's signature curve and first yield.",
+  "author": "CivilKit",
+  "license": "MIT",
+  "contributes": [{ "point": "buckling.tool", "id": "dsm-compression" }],
+  "capabilities": ["getModel", "firstYield", "stress", "signature", "modes"]
+}

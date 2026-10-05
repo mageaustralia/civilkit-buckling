@@ -1,0 +1,473 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Python API reference · CivilKit Buckling guide</title>
+<meta name="description" content="Every public name of cufsm_rs, the cufsm-rs-py package, as the console runs it: signatures, arguments, defaults, units and returns, and how each behaves with pip, in full Python in the page and on MicroPython.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html" aria-current="page"><span class="g-num">11</span> Python API reference</a>
+      <ul>
+        <li><a href="#runtimes">Three places, one API</a></li>
+        <li><a href="#conventions">Units, load factors, end conditions</a></li>
+        <li><a href="#tables">CUFSM's tables</a></li>
+        <li><a href="#py-Model">Model</a></li>
+        <li><a href="#props">Properties, yield, stresses</a></li>
+        <li><a href="#analysis">signature and strip</a></li>
+        <li><a href="#py-StripResult">StripResult</a></li>
+        <li><a href="#py-ModeShape">ModeShape</a></li>
+        <li><a href="#py-classify">classify</a></li>
+        <li><a href="#templates">Templates</a></li>
+        <li><a href="#plot">cufsm_rs.plot</a></li>
+        <li><a href="#errors">Errors</a></li>
+      </ul></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Python API reference (<code>cufsm_rs</code>)</h1>
+<p class="g-lede">Every public name of <code>cufsm_rs</code>, the package <code>pip install cufsm-rs-py</code> installs and
+the console imports, taken from its code: signatures, arguments, defaults, units and returns. Each entry says how it
+behaves on your own machine, in full Python in the page and on the console's MicroPython.</p>
+
+<div class="g-table"><table>
+  <thead><tr><th>Name</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><a href="#py-Model"><code>Model</code></a></td><td>A cross-section as CUFSM's tables.</td></tr>
+    <tr><td><a href="#py-section_properties"><code>section_properties</code></a>, <a href="#py-SectionProperties"><code>SectionProperties</code></a></td><td>Area, centroid, second moments, J, shear centre, Cw, warping function.</td></tr>
+    <tr><td><a href="#py-first_yield"><code>first_yield</code></a>, <a href="#py-YieldActions"><code>YieldActions</code></a></td><td>The first-yield actions for a yield stress.</td></tr>
+    <tr><td><a href="#py-stress"><code>stress</code></a></td><td>Reference stresses from member actions.</td></tr>
+    <tr><td><a href="#py-stress_to_action"><code>stress_to_action</code></a>, <a href="#py-StressActions"><code>StressActions</code></a></td><td>The actions that best fit a model's stresses.</td></tr>
+    <tr><td><a href="#py-signature"><code>signature</code></a></td><td>The signature curve and its minima.</td></tr>
+    <tr><td><a href="#py-strip"><code>strip</code></a></td><td>Load factors and modes at any lengths, end conditions, terms and cFSM spaces.</td></tr>
+    <tr><td><a href="#py-StripResult"><code>StripResult</code></a></td><td>What <code>signature</code> and <code>strip</code> return.</td></tr>
+    <tr><td><a href="#py-ModeShape"><code>ModeShape</code></a>, <a href="#py-Displacements"><code>Displacements</code></a></td><td>One mode as per-node displacements.</td></tr>
+    <tr><td><a href="#py-classify"><code>classify</code></a>, <a href="#py-MODE_CLASSES"><code>MODE_CLASSES</code></a></td><td>cFSM modal classification: G, D, L, O percentages.</td></tr>
+    <tr><td><a href="#py-template"><code>template</code></a>, <a href="#py-lipped_c"><code>lipped_c</code></a>, <a href="#py-lipped_z"><code>lipped_z</code></a>, <a href="#py-plain_c"><code>plain_c</code></a></td><td>Models from CUFSM's C and Z template.</td></tr>
+    <tr><td><a href="#py-MechanismError"><code>MechanismError</code></a></td><td>The error for a section with a mechanism.</td></tr>
+    <tr><td><a href="#plot"><code>cufsm_rs.plot</code></a></td><td><code>plot_section</code>, <code>plot_signature</code>, <code>plot_mode</code>.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="runtimes">Three places, one API<a class="g-anchor" href="#runtimes" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Where</th><th>What <code>import cufsm_rs</code> is</th><th>Arrays</th><th>Plots</th></tr></thead>
+  <tbody>
+    <tr><td><b>Desktop</b>: <code>pip install cufsm-rs-py</code></td><td>The package, with its compiled native engine (cufsm-rs, built for your machine)</td><td>numpy</td><td>matplotlib (<code>pip install "cufsm-rs-py[plot]"</code>)</td></tr>
+    <tr><td><b>Full Python in the page</b> (Pyodide)</td><td>The package's own Python code, cufsm-rs-py 0.1.0, unchanged; its native part replaced by calls to the page's <code>cufsm.wasm</code></td><td>numpy</td><td>matplotlib, shown in the console's output</td></tr>
+    <tr><td><b>MicroPython in the page</b></td><td>cufsm_rs lite: the same names, signatures and defaults, written for MicroPython, on the same <code>cufsm.wasm</code></td><td><a href="runtimes.html#arrays"><code>Array</code></a></td><td>drawn by the page; functions return a <code>Figure</code></td></tr>
+  </tbody>
+</table></div>
+<p>Where this page says <i>array</i>, it means a numpy <code>ndarray</code> on the first two and an <code>Array</code>
+on MicroPython. The differences on MicroPython are listed under each entry, marked <b>Lite</b>. Things only a
+notebook uses (the <code>_repr_html_</code> tables) are the package's and are not shown by the console, which prints
+the plain <code>repr</code>. <code>cufsm_rs.__version__</code> is <code>"0.1.0"</code> in the page (pip's current
+release is 0.1.1, the same API); the lite package also has <code>__lite__ = True</code>.</p>
+
+<h2 id="conventions">Units, load factors, end conditions<a class="g-anchor" href="#conventions" aria-label="Link to this section">#</a></h2>
+<h3 id="units">Units<a class="g-anchor" href="#units" aria-label="Link to this section">#</a></h3>
+<p>The package is unit-agnostic, as CUFSM is: use one consistent set and every result comes back in it. With N, mm
+and MPa: coordinates, thicknesses and lengths in mm, moduli and stresses in MPa, forces in N, moments in N·mm, the
+bimoment in N·mm², areas in mm², I and J in mm⁴, Cw in mm⁶. CUFSM's own tutorial uses kip, in and ksi. The only
+defaults with units are the templates' <code>E</code>: <code>template</code>'s 29500 (ksi), and
+<code>lipped_c</code>, <code>lipped_z</code> and <code>plain_c</code>'s 203000 (MPa, so give those dimensions in mm).</p>
+<p>x and z are the cross-section's coordinates; y runs along the member. Positive stress is compression.</p>
+
+<h3 id="load-factor">Load factors<a class="g-anchor" href="#load-factor" aria-label="Link to this section">#</a></h3>
+<p>A load factor multiplies the model's <b>reference stresses</b> (the node table's last column): the section buckles
+when those stresses are multiplied by it. Set the reference stresses from the squash load,
+<code>stress(model, P=y.Py)</code>, and a load factor reads directly as <code>Pcr / Py</code>; set them from
+<code>P = 1</code> and it reads as <code>Pcr</code> in your force unit.</p>
+
+<h3 id="bc">End conditions<a class="g-anchor" href="#bc" aria-label="Link to this section">#</a></h3>
+<div class="g-table"><table>
+  <thead><tr><th><code>bc</code></th><th>Ends</th><th>Lengths are</th></tr></thead>
+  <tbody>
+    <tr><td><code>"S-S"</code></td><td>simply supported (pinned) at both ends</td><td>with one term (<code>m_all=None</code>): half-wavelengths, the signature curve; with more terms: member lengths</td></tr>
+    <tr><td><code>"C-C"</code></td><td>clamped (fixed) at both ends</td><td>member lengths</td></tr>
+    <tr><td><code>"S-C"</code> (or <code>"C-S"</code>)</td><td>simply supported at one end, clamped at the other</td><td>member lengths</td></tr>
+    <tr><td><code>"C-F"</code> (or <code>"F-C"</code>)</td><td>clamped at one end, free at the other</td><td>member lengths</td></tr>
+    <tr><td><code>"C-G"</code> (or <code>"G-C"</code>)</td><td>clamped at one end, guided at the other</td><td>member lengths</td></tr>
+  </tbody>
+</table></div>
+<p>Lower case is accepted; the result's <code>bc</code> is upper case. With general end conditions the modes couple
+across longitudinal terms, so give enough terms (<code>m_all</code>) to reach the shortest half-wave that matters
+(Schafer and Li, 2010).</p>
+
+<h2 id="tables">CUFSM's tables<a class="g-anchor" href="#tables" aria-label="Link to this section">#</a></h2>
+<p>A model is CUFSM's own arrays, in CUFSM's column order, with its <b>1-based</b> node and material numbers.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Table</th><th>Columns</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>prop</code></td><td class="wrap"><code>[mat#, Ex, Ey, vx, vy, G]</code></td><td>One row per material. An isotropic material has <code>Ex = Ey = E</code>, <code>vx = vy = ν</code>, <code>G = E / (2 (1 + ν))</code>.</td></tr>
+    <tr><td><code>node</code></td><td class="wrap"><code>[node#, x, z, xdof, zdof, ydof, qdof, stress]</code></td><td>The four DOF flags: 1 free, 0 fixed (x, z, y along the member, θ). <code>stress</code> is the reference stress, positive in compression.</td></tr>
+    <tr><td><code>elem</code></td><td class="wrap"><code>[elem#, nodei, nodej, t, mat#]</code></td><td>A strip between two nodes, thickness <code>t</code>. With 4 columns (no <code>mat#</code>) every element takes the first material.</td></tr>
+    <tr><td><code>constraints</code></td><td class="wrap"><code>[node#e, dofe, coeff, node#k, dofk]</code></td><td>DOF e of node e equals <code>coeff</code> times DOF k of node k. DOF codes: 1 x, 2 z, 3 y, 4 θ.</td></tr>
+    <tr><td><code>springs</code></td><td class="wrap"><code>[#, nodei, nodej, ku, kv, kw, kq, local, discrete, ys]</code></td><td>CUFSM v4.3's form. <code>nodej</code> 0 is ground. <code>local</code> 1 orients a spring between two nodes along the line joining them (else <code>ku</code> acts along x and <code>kw</code> along z). <code>discrete</code> 0 is a foundation spring, a stiffness per unit length; 1 is a spring at one point, <code>ys</code> the fraction of the length where it acts.</td></tr>
+  </tbody>
+</table></div>
+<p>Mode vectors use CUFSM's DOF order: for each longitudinal term in turn, a block of <code>4 × nodes</code> values,
+first <code>u</code> and <code>v</code> interleaved for every node (<code>u1 v1 u2 v2 …</code>), then <code>w</code>
+and <code>θ</code> interleaved (<code>w1 θ1 w2 θ2 …</code>). Each mode is scaled so its largest entry is +1.</p>
+
+<h2 id="py-Model"><code>Model</code><a class="g-anchor" href="#py-Model" aria-label="Link to this section">#</a></h2>
+<pre><code>Model(prop, node, elem, constraints=None, springs=None)</code></pre>
+<p>A cross-section held as <a href="#tables">CUFSM's tables</a>. Each argument is a list of rows (or a numpy array);
+one row may be given flat. <code>prop</code>, <code>node</code> and <code>elem</code> need at least one row each;
+<code>elem</code> takes 4 or 5 columns. A wrong shape raises <code>ValueError</code>
+(<code>node must be a 2-D array with 8 columns, got shape (3, 7)</code>). Numbers that refer to nothing (an element's
+node that is not in <code>node</code>) are refused when the model is first analysed.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Member</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>prop</code>, <code>node</code>, <code>elem</code>, <code>constraints</code>, <code>springs</code></td><td>The tables, as arrays of shape (rows, 6), (rows, 8), (rows, 5), (rows, 5) and (rows, 10); editable in place (<code>m.node[3][7] = 0.5</code>). Empty <code>constraints</code> and <code>springs</code> have 0 rows.</td></tr>
+    <tr><td><code>x</code>, <code>z</code>, <code>stress</code></td><td>Node columns 2, 3 and 8 (coordinates and reference stresses), as views: writing to one writes the table.</td></tr>
+    <tr><td id="py-Model-from_dicts"><code>Model.from_dicts(nodes, elements, materials=None, E=None, nu=0.3, constraints=(), springs=())</code></td><td>A model from lists of dicts with <b>0-based</b> indices. <code>nodes</code>: <code>{"x", "z", "stress"=1.0, "free"=(1, 1, 1, 1)}</code> (free flags for x, z, y, θ). <code>elements</code>: <code>{"i", "j", "t", "mat"=0}</code>. <code>materials</code>: <code>{"E", "nu"}</code> or <code>{"Ex", "Ey", "vx", "vy", "G"}</code>; or give <code>E</code> (and <code>nu</code>) for one isotropic material (neither raises <code>ValueError: give materials or E</code>). <code>constraints</code>: <code>{"node_e", "dof_e", "coeff"=1.0, "node_k", "dof_k"}</code>, DOFs as 1 to 4 or <code>"x"</code>, <code>"z"</code>, <code>"y"</code>, <code>"q"</code> (or <code>"theta"</code>). <code>springs</code>: <code>{"i", "j"=None (ground), "ku", "kv", "kw", "kq"=0, "local"=False, "discrete"=False, "ys"=0}</code>.</td></tr>
+    <tr><td><code>copy()</code></td><td>A deep copy.</td></tr>
+    <tr><td><code>with_stress(s)</code></td><td>A copy with the reference stresses replaced by <code>s</code>, one value per node (else <code>ValueError</code>).</td></tr>
+    <tr><td><code>section_properties()</code>, <code>first_yield(fy, restrained=False, extreme_fibre=True)</code>, <code>signature(lengths=None, neigs=1)</code>, <code>strip(lengths, m_all=None, bc="S-S", neigs=20, spaces=None)</code></td><td>The module functions as methods: <code>m.signature()</code> is <code>signature(m)</code>.</td></tr>
+  </tbody>
+</table></div>
+<p><code>repr</code>: <code>Model(10 nodes, 9 elements, 1 materials, 0 constraints, 0 springs)</code>.
+<b>Lite:</b> the tables are <code>Array</code>s and <code>x</code>, <code>z</code>, <code>stress</code> writable column
+views; index them <code>m.node[i][j]</code>, not <code>m.node[i, j]</code>.</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+# CUFSM's tutorial C, 9 x 5 x 1 in, t = 0.1 in (kip, in, ksi)
+xz = [(5, 1), (5, 0), (2.5, 0), (0, 0), (0, 3), (0, 6), (0, 9), (2.5, 9), (5, 9), (5, 8)]
+m = fsm.Model(
+    prop=[[100, 29500, 29500, 0.3, 0.3, 11346.15]],
+    node=[[i + 1, x, z, 1, 1, 1, 1, 0] for i, (x, z) in enumerate(xz)],
+    elem=[[i + 1, i + 1, i + 2, 0.1, 100] for i in range(9)],
+)
+print(m)
+
+# the same channel from dicts, 0-based
+m2 = fsm.Model.from_dicts(
+    nodes=[{"x": x, "z": z} for x, z in xz],
+    elements=[{"i": k, "j": k + 1, "t": 0.1} for k in range(9)],
+    E=29500, nu=0.3,
+)
+print(m2.node[0][7], len(m2.x))      # the default reference stress 1.0, and 10 nodes</code></pre>
+
+<h2 id="props">Properties, yield and stresses<a class="g-anchor" href="#props" aria-label="Link to this section">#</a></h2>
+<h3 id="py-section_properties"><code>section_properties(model)</code><a class="g-anchor" href="#py-section_properties" aria-label="Link to this section">#</a></h3>
+<p>Gross and thin-walled section properties (CUFSM's <code>grosprop</code> and <code>cutwp_prop2</code>). Returns a
+<a href="#py-SectionProperties"><code>SectionProperties</code></a>.</p>
+<h3 id="py-SectionProperties"><code>SectionProperties</code><a class="g-anchor" href="#py-SectionProperties" aria-label="Link to this section">#</a></h3>
+<p>A frozen record, read as attributes (<code>p.A</code>) or as a mapping (<code>p["A"]</code>, <code>p.keys()</code>,
+<code>p.as_dict()</code>). Units for N, mm, MPa:</p>
+<div class="g-table"><table>
+  <thead><tr><th>Field</th><th>What it is</th><th>Unit</th></tr></thead>
+  <tbody>
+    <tr><td><code>A</code></td><td>area</td><td>mm²</td></tr>
+    <tr><td><code>xcg</code>, <code>zcg</code></td><td>centroid</td><td>mm</td></tr>
+    <tr><td><code>Ixx</code>, <code>Izz</code>, <code>Ixz</code></td><td>second moments of area about centroidal axes parallel to x and z</td><td>mm⁴</td></tr>
+    <tr><td><code>thetap</code></td><td>angle of the principal axes from x</td><td>degrees</td></tr>
+    <tr><td><code>I11</code>, <code>I22</code></td><td>principal second moments of area</td><td>mm⁴</td></tr>
+    <tr><td><code>J</code></td><td>St Venant torsion constant</td><td>mm⁴</td></tr>
+    <tr><td><code>xs</code>, <code>zs</code></td><td>shear centre</td><td>mm</td></tr>
+    <tr><td><code>Cw</code></td><td>warping constant</td><td>mm⁶</td></tr>
+    <tr><td><code>B1</code>, <code>B2</code></td><td>monosymmetry (Wagner) parameters about principal axes 1 and 2</td><td>mm</td></tr>
+    <tr><td><code>wn</code></td><td>normalised unit warping at each node, in node order (an array)</td><td>mm²</td></tr>
+  </tbody>
+</table></div>
+<p>For a closed cell the warping quantities (<code>xs</code>, <code>zs</code>, <code>Cw</code>, <code>B1</code>,
+<code>B2</code>, <code>wn</code>) are NaN, as in CUFSM.</p>
+
+<h3 id="py-first_yield"><code>first_yield(model, fy, restrained=False, extreme_fibre=True)</code><a class="g-anchor" href="#py-first_yield" aria-label="Link to this section">#</a></h3>
+<p>The first-yield actions for yield stress <code>fy</code> (in the model's stress unit): each action alone that first
+brings a fibre to <code>fy</code>. <code>extreme_fibre=True</code> (the default, as current CUFSM) checks the element
+faces (<code>yieldMP_extfiber</code>); <code>False</code> checks the centreline nodes (<code>yieldMP</code>).
+<code>restrained=True</code> is restrained bending (<code>Ixz</code> ignored). <code>fy</code> must be positive and
+finite, else <code>ValueError</code>. Returns a <a href="#py-YieldActions"><code>YieldActions</code></a>.</p>
+<h3 id="py-YieldActions"><code>YieldActions</code><a class="g-anchor" href="#py-YieldActions" aria-label="Link to this section">#</a></h3>
+<p>A frozen record, also a mapping: <code>fy</code> (the yield stress used), <code>Py</code> (squash load, A fy, N),
+<code>Mxx</code>, <code>Mzz</code> (about the centroidal axes parallel to x and z, N·mm), <code>M11</code>,
+<code>M22</code> (about the principal axes, N·mm), <code>B</code> (the bimoment, CUFSM's <code>yieldB</code>, N·mm²).</p>
+
+<h3 id="py-stress"><code>stress(model, P=0.0, Mxx=0.0, Mzz=0.0, M11=0.0, M22=0.0, B=0.0, restrained=False, as_array=False)</code><a class="g-anchor" href="#py-stress" aria-label="Link to this section">#</a></h3>
+<p>Reference stresses from member actions (CUFSM's <code>stresgen</code>, plus <code>warp_stress</code> for a
+bimoment). <code>P</code> axial force, positive in compression; <code>Mxx</code>, <code>Mzz</code> moments about the
+centroidal axes parallel to x and z; <code>M11</code>, <code>M22</code> about the principal axes; <code>B</code> a
+bimoment. The actions add. The model's own stress column is ignored. Returns a <b>new</b> <code>Model</code> with the
+stresses set (the model passed in is unchanged), or with <code>as_array=True</code> the stresses alone, one per node.</p>
+
+<h3 id="py-stress_to_action"><code>stress_to_action(model)</code><a class="g-anchor" href="#py-stress_to_action" aria-label="Link to this section">#</a></h3>
+<p>The <code>P</code>, <code>M11</code>, <code>M22</code> and <code>B</code> whose stresses best fit the model's nodal
+stresses, by least squares (CUFSM's <code>stress_to_action</code>). Returns a
+<a href="#py-StressActions"><code>StressActions</code></a>.</p>
+<h3 id="py-StressActions"><code>StressActions</code><a class="g-anchor" href="#py-StressActions" aria-label="Link to this section">#</a></h3>
+<p>A frozen record, also a mapping: <code>P</code>, <code>M11</code>, <code>M22</code>, <code>B</code>, and
+<code>err</code>, the fit's residual norm (a stress).</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+m = fsm.lipped_c(150, 64, 15, 1.5)          # mm; E = 203000 MPa
+p = fsm.section_properties(m)
+print("A = %.1f mm2, Ixx = %.4g mm4, Cw = %.4g mm6, xs = %.2f mm" % (p.A, p.Ixx, p.Cw, p.xs))
+y = fsm.first_yield(m, fy=450)
+print("Py = %.1f kN, Mxx = %.2f kNm" % (y.Py / 1e3, y.Mxx / 1e6))
+mb = fsm.stress(m, Mxx=y.Mxx)                # bending about x at first yield
+a = fsm.stress_to_action(mb)
+print("fitted M11 = %.4g N.mm, residual %.2g" % (a.M11, a.err))</code></pre>
+
+<h2 id="analysis">Analysis: <code>signature</code> and <code>strip</code><a class="g-anchor" href="#analysis" aria-label="Link to this section">#</a></h2>
+<h3 id="py-signature"><code>signature(model, lengths=None, neigs=1)</code><a class="g-anchor" href="#py-signature" aria-label="Link to this section">#</a></h3>
+<p>The signature curve: S-S ends, one half-wave at each half-wavelength. <code>lengths</code> are half-wavelengths in
+the model's length unit (any sequence; it is flattened); <code>None</code> gives CUFSM's <code>signature_ss</code>
+100 log-spaced lengths for this model. <code>neigs</code> is how many load factors to find at each length. Returns a
+<a href="#py-StripResult"><code>StripResult</code></a> with <code>kind = "signature"</code> and its
+<code>minima</code> filled: the interior local minima of the lowest curve, shortest first, refined by a parabola in
+log length. Each length must be positive and finite.</p>
+
+<h3 id="py-strip"><code>strip(model, lengths, m_all=None, bc="S-S", neigs=20, spaces=None)</code><a class="g-anchor" href="#py-strip" aria-label="Link to this section">#</a></h3>
+<p>CUFSM's <code>stripmain</code>: load factors and modes at each length.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Argument</th><th>Default</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>lengths</code></td><td>(required)</td><td>Half-wavelengths for S-S with one term; member lengths otherwise. Model length unit.</td></tr>
+    <tr><td><code>m_all</code></td><td><code>None</code></td><td>The longitudinal terms at each length: <code>None</code> for <code>[1]</code>; an int <code>n</code> for <code>1..n</code>; one list (<code>[1, 3, 5]</code>) used at every length; or a list of lists, one per length (else <code>ValueError: 3 lengths but 2 sets of longitudinal terms</code>). Each list is sorted and its zeros and repeats dropped, as CUFSM's <code>msort</code>; <code>m_terms</code> reports what was used.</td></tr>
+    <tr><td><code>bc</code></td><td><code>"S-S"</code></td><td>The <a href="#bc">end conditions</a>.</td></tr>
+    <tr><td><code>neigs</code></td><td><code>20</code></td><td>How many load factors to find at each length, smallest first. Fewer may be found (the rest are NaN).</td></tr>
+    <tr><td><code>spaces</code></td><td><code>None</code></td><td>Restrict the analysis to cFSM spaces: a string of the letters G, D, L, O in either case, e.g. <code>"D"</code> for pure distortional or <code>"GD"</code> for the union of global and distortional (constrained FSM). <code>None</code> is the unrestricted analysis.</td></tr>
+  </tbody>
+</table></div>
+<p>Returns a <a href="#py-StripResult"><code>StripResult</code></a> with <code>kind = "strip"</code> and empty
+<code>minima</code>. There is no fixed limit on <code>neigs</code> or the number of terms; memory is the limit (the
+solve holds dense matrices of <code>(4 × nodes × terms)²</code> values).</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+m = fsm.lipped_c(150, 64, 15, 1.5)
+mc = fsm.stress(m, P=fsm.first_yield(m, fy=450).Py)    # load factor = Pcr / Py
+
+sig = fsm.signature(mc)
+print(sig)
+for L, lf in sig.minima:
+    print("minimum at %.0f mm: %.3f Py" % (L, lf))
+
+dist = fsm.strip(mc, [400.0], spaces="D", neigs=1)     # pure distortional (cFSM)
+print("D-only at 400 mm: %.3f Py" % dist.load_factors[0][0])
+
+cc = fsm.strip(mc, [1000.0, 2000.0], m_all=12, bc="C-C", neigs=2)   # fixed ends
+print("C-C:", [round(cc.curve[i], 4) for i in range(len(cc.curve))])</code></pre>
+
+<h2 id="py-StripResult"><code>StripResult</code><a class="g-anchor" href="#py-StripResult" aria-label="Link to this section">#</a></h2>
+<p>What <code>signature</code> and <code>strip</code> return.</p>
+<div class="g-table"><table>
+  <thead><tr><th>Member</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>model</code></td><td>The analysed <code>Model</code>.</td></tr>
+    <tr><td><code>bc</code></td><td>The end conditions, upper case.</td></tr>
+    <tr><td><code>kind</code></td><td><code>"signature"</code> or <code>"strip"</code>.</td></tr>
+    <tr><td><code>lengths</code></td><td>(nlengths,) the lengths analysed.</td></tr>
+    <tr><td><code>m_terms</code></td><td>A list with one (nterms,) array per length: the terms used there.</td></tr>
+    <tr><td><code>load_factors</code></td><td>(nlengths, neigs), smallest first at each length; NaN where fewer were found.</td></tr>
+    <tr><td><code>modes</code></td><td>(nlengths, neigs, ndof) raw mode vectors in <a href="#tables">CUFSM's DOF order</a>, NaN-padded. Use <code>mode_shape</code> for per-node arrays.</td></tr>
+    <tr><td><code>minima</code></td><td>(nminima, 2) rows of <code>[length, load factor]</code> at the interior local minima, shortest first. <code>signature</code> only; empty for <code>strip</code>.</td></tr>
+    <tr><td><code>curve</code></td><td>The lowest load factor at each length, <code>load_factors[:, 0]</code>.</td></tr>
+    <tr><td><code>neigs</code></td><td>The number of load-factor columns.</td></tr>
+    <tr><td><code>mode_shape(i_length, k_mode=0)</code></td><td>Mode <code>k_mode</code> (0 is the lowest) at <code>lengths[i_length]</code>, as a <a href="#py-ModeShape"><code>ModeShape</code></a>. Negative <code>i_length</code> counts from the end. <code>IndexError</code> when out of range or when that mode was not found.</td></tr>
+    <tr><td><code>classify(orth="axial", norm="vector", ospace="st")</code></td><td><a href="#py-classify"><code>classify(self, …)</code></a>: (nlengths, neigs, 4) percentages <code>[G, D, L, O]</code>.</td></tr>
+    <tr><td><code>classify_minima()</code></td><td><code>[G, D, L, O]</code> percentages of the lowest mode at each of <code>minima</code>, shape (nminima, 4): each minimum's length is solved again (S-S, one term) and classified with CUFSM's defaults.</td></tr>
+  </tbody>
+</table></div>
+<p><code>repr</code>: <code>StripResult(signature, bc=S-S, 80 lengths 1 to 1000, neigs=1, 2 minima)</code>.
+<b>Lite:</b> every array is an <code>Array</code>, so <code>curve</code> is a new <code>Array</code> built from
+<code>load_factors</code>, and <code>load_factors[:, 0]</code> raises; use <code>r.curve</code> or
+<code>r.load_factors[i][0]</code>.</p>
+
+<h2 id="py-ModeShape"><code>ModeShape</code><a class="g-anchor" href="#py-ModeShape" aria-label="Link to this section">#</a></h2>
+<p>One buckling mode split into per-node displacement amplitudes, from <code>StripResult.mode_shape</code>. The finite
+strip field is, for each longitudinal term m with shape function Y<sub>m</sub> (<code>sin(mπy/a)</code> for S-S) and
+length a:</p>
+<pre><code>u(x, y) = Σ u_m Y_m(y)                 along x
+w(x, y) = Σ w_m Y_m(y)                 along z
+θ       = Σ θ_m Y_m(y)
+v(x, y) = Σ v_m Y_m'(y) a / (m π)      along y, the member axis</code></pre>
+<div class="g-table"><table>
+  <thead><tr><th>Field</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>length</code>, <code>load_factor</code>, <code>bc</code></td><td>The length a, the mode's load factor and the end conditions.</td></tr>
+    <tr><td><code>m_terms</code></td><td>(nterms,) the longitudinal terms.</td></tr>
+    <tr><td><code>x</code>, <code>z</code></td><td>(nnodes,) the undeformed node coordinates.</td></tr>
+    <tr><td><code>u</code>, <code>v</code>, <code>w</code>, <code>theta</code></td><td>(nterms, nnodes) amplitudes per term and node. <code>theta</code> is the rotation in the x–z plane, positive anticlockwise with x to the right and z up.</td></tr>
+    <tr><td><code>dofs</code></td><td>(4 × nnodes × nterms,) the raw vector. For term block t and node i, with n nodes and o = 4nt: <code>u = dofs[o + 2i]</code>, <code>v = dofs[o + 2i + 1]</code>, <code>w = dofs[o + 2n + 2i]</code>, <code>theta = dofs[o + 2n + 2i + 1]</code>. Scaled so its largest entry is +1: displacements are relative, not absolute.</td></tr>
+    <tr><td><code>at(y=None)</code></td><td>The nodal displacements at <code>y</code> along the member (0 to <code>length</code>), summed over the terms, as <a href="#py-Displacements"><code>Displacements</code></a>. With <code>None</code>, where the in-plane displacement (u, w) is largest: mid-length for one S-S term.</td></tr>
+  </tbody>
+</table></div>
+<h3 id="py-Displacements"><code>Displacements</code><a class="g-anchor" href="#py-Displacements" aria-label="Link to this section">#</a></h3>
+<p>A named tuple <code>(y, u, v, w, theta)</code>: the position, and one value per node for each displacement.</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+m = fsm.lipped_c(150, 64, 15, 1.5)
+mc = fsm.stress(m, P=1.0)
+r = fsm.strip(mc, [400.0], neigs=3)
+shape = r.mode_shape(0)                 # the lowest mode at 400 mm
+d = shape.at()                          # summed over terms, where it is largest
+big = max(range(len(d.u)), key=lambda i: abs(d.u[i]) + abs(d.w[i]))
+print("load factor %.4g: node %d moves most (u %.3f, w %.3f)" % (shape.load_factor, big + 1, d.u[big], d.w[big]))</code></pre>
+
+<h2 id="py-classify"><code>classify(result, orth="axial", norm="vector", ospace="st")</code><a class="g-anchor" href="#py-classify" aria-label="Link to this section">#</a></h2>
+<p>cFSM modal classification (CUFSM's <code>classify.m</code>, uncoupled basis). Returns (nlengths, neigs, 4)
+percentages <code>[G, D, L, O]</code> in <a href="#py-MODE_CLASSES"><code>MODE_CLASSES</code></a> order, NaN-padded
+where fewer modes were found. The options, each case-insensitive; the defaults are CUFSM's:</p>
+<div class="g-table"><table>
+  <thead><tr><th>Option</th><th>Values</th></tr></thead>
+  <tbody>
+    <tr><td><code>orth</code></td><td><code>"natural"</code>, <code>"axial"</code>, <code>"load"</code> (the basis's orthogonalisation)</td></tr>
+    <tr><td><code>norm</code></td><td><code>"none"</code>, <code>"vector"</code>, <code>"strain_energy"</code>, <code>"work"</code> (the normalisation)</td></tr>
+    <tr><td><code>ospace</code></td><td><code>"st"</code>, <code>"k"</code>, <code>"kg"</code>, <code>"vector"</code> (how the O space is formed)</td></tr>
+  </tbody>
+</table></div>
+<p>A few combinations CUFSM itself leaves undefined are refused with a <code>ValueError</code>, as the package
+refuses them. <code>result.classify(…)</code> is the same call.</p>
+<h3 id="py-MODE_CLASSES"><code>MODE_CLASSES</code><a class="g-anchor" href="#py-MODE_CLASSES" aria-label="Link to this section">#</a></h3>
+<p><code>("G", "D", "L", "O")</code>: global, distortional, local, other, the order of every classification.</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+mc = fsm.stress(fsm.lipped_c(150, 64, 15, 1.5), P=1.0)
+r = fsm.strip(mc, [60.0, 400.0, 3000.0], neigs=1)
+for i, per in enumerate(r.classify()):
+    c = per[0]
+    k = max(range(4), key=lambda j: c[j])
+    print("%5.0f mm: %s %.0f%%" % (r.lengths[i], fsm.MODE_CLASSES[k], c[k]))</code></pre>
+
+<h2 id="templates">Templates<a class="g-anchor" href="#templates" aria-label="Link to this section">#</a></h2>
+<h3 id="py-template"><code>template(shape="C", h=9.0, b1=5.0, b2=None, d1=1.0, d2=None, r1=0.0, r2=None, r3=None, r4=None, q1=90.0, q2=None, t=0.1, nh=4, nb1=2, nb2=None, nd1=None, nd2=None, nr1=None, nr2=None, nr3=None, nr4=None, centerline=True, E=29500.0, nu=0.3)</code><a class="g-anchor" href="#py-template" aria-label="Link to this section">#</a></h3>
+<p>CUFSM's C and Z template (<code>templatecalc</code>), meshed by the engine. <code>shape</code> <code>"C"</code> or
+<code>"Z"</code>; <code>h</code> web depth; <code>b1</code>, <code>b2</code> flange widths; <code>d1</code>,
+<code>d2</code> lip lengths (0 for none); <code>r1</code> to <code>r4</code> corner radii; <code>q1</code>,
+<code>q2</code> lip angles in degrees; <code>t</code> thickness; <code>nh</code>, <code>nb1</code>, <code>nb2</code>,
+<code>nd1</code>, <code>nd2</code>, <code>nr1</code> to <code>nr4</code> strip counts; <code>centerline</code> whether
+the dimensions are to the centreline (else outside dimensions and inside radii). A second-side value left as
+<code>None</code> takes the first side's; a lip or corner strip count left as <code>None</code> is 2 where that lip
+or radius is non-zero, else 0. The defaults are CUFSM's, in inches and ksi. Returns a <code>Model</code> with one
+isotropic material (<code>E</code>, <code>nu</code>), every node free and a reference stress of 1.0 at every node.</p>
+<h3 id="py-lipped_c"><code>lipped_c(depth, flange, lip, t, ri=0.0, mesh=12, E=203000.0, nu=0.3)</code><a class="g-anchor" href="#py-lipped_c" aria-label="Link to this section">#</a></h3>
+<p>A lipped channel from <b>outside</b> dimensions and inside radius <code>ri</code>: <code>mesh</code> strips across the
+web, half that (at least 2) across each flange, two per lip and two per corner (when <code>ri</code> &gt; 0). The
+default <code>E</code> is steel in MPa, so give the dimensions in mm.</p>
+<h3 id="py-lipped_z"><code>lipped_z(depth, flange, lip, t, ri=0.0, mesh=12, E=203000.0, nu=0.3)</code><a class="g-anchor" href="#py-lipped_z" aria-label="Link to this section">#</a></h3>
+<p>A lipped Z, as <code>lipped_c</code>.</p>
+<h3 id="py-plain_c"><code>plain_c(depth, flange, t, ri=0.0, mesh=12, E=203000.0, nu=0.3)</code><a class="g-anchor" href="#py-plain_c" aria-label="Link to this section">#</a></h3>
+<p>A plain (unlipped) channel, as <code>lipped_c</code> with no lip.</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+
+lc = fsm.lipped_c(200, 76, 15, 1.9, ri=3)    # mm
+print(lc)                                     # 37 nodes
+z = fsm.lipped_z(200, 76, 15, 1.9, ri=3)
+pc = fsm.plain_c(100, 50, 2.0)
+tc = fsm.template("C", h=9, b1=5, d1=1, t=0.1) # CUFSM's default C, inches
+print(len(z.node), len(pc.node), len(tc.node))</code></pre>
+
+<h2 id="plot"><code>cufsm_rs.plot</code><a class="g-anchor" href="#plot" aria-label="Link to this section">#</a></h2>
+<p>Three plots. With pip they need matplotlib (<code>pip install "cufsm-rs-py[plot]"</code>); <code>import
+cufsm_rs</code> alone never imports it. In the page they need nothing extra on MicroPython, and on full Python a script
+that uses them downloads matplotlib with the rest.</p>
+<h3 id="py-plot_section"><code>plot_section(model, ax=None, node_numbers=False, stress=True)</code><a class="g-anchor" href="#py-plot_section" aria-label="Link to this section">#</a></h3>
+<p>The cross-section: elements drawn to their thickness, the nodes, and with <code>stress=True</code> the reference
+stress, compression and tension in their own colours. <code>node_numbers=True</code> labels the nodes with their CUFSM
+numbers.</p>
+<h3 id="py-plot_signature"><code>plot_signature(result, ax=None, classify=False)</code><a class="g-anchor" href="#py-plot_signature" aria-label="Link to this section">#</a></h3>
+<p>Load factor against length on a log x axis, the minima marked and labelled (<code>0.353 at 7.27</code>).
+<code>classify=True</code> also labels each minimum with its dominant cFSM class from
+<code>classify_minima()</code>, and the runner-up when it is 25 % or more (<code>D 54% L 45%</code>).</p>
+<h3 id="py-plot_mode"><code>plot_mode(result, i_length, k_mode=0, ax=None, scale=None, y=None)</code><a class="g-anchor" href="#py-plot_mode" aria-label="Link to this section">#</a></h3>
+<p>A mode's deformed cross-section over the undeformed one, cut at <code>y</code> along the member (default: where the
+in-plane displacement is largest). <code>scale</code> multiplies the displacements; by default the largest in-plane
+displacement is drawn at 10 % of the section size, whatever the units. Titled
+<code>mode 1: load factor … at length …</code>.</p>
+<div class="g-table"><table>
+  <thead><tr><th></th><th>pip and full Python</th><th>Lite (MicroPython)</th></tr></thead>
+  <tbody>
+    <tr><td>Draws with</td><td>matplotlib</td><td>the page's own drawing code, in the console's output</td></tr>
+    <tr><td>Returns</td><td>the matplotlib Axes</td><td id="py-Figure">a <code>Figure</code>: its <code>kind</code> (<code>"section"</code>, <code>"signature"</code> or <code>"mode"</code>) and <code>title</code>; any Axes method on it raises, naming the full runtime</td></tr>
+    <tr><td><code>ax=</code></td><td>draws on those axes (a new figure's when <code>None</code>)</td><td>must be <code>None</code>; anything else raises <code>NotImplementedError</code> (and the console's fallback moves the script to full Python)</td></tr>
+    <tr><td>When it appears</td><td>pip: on <code>plt.show()</code> or in a notebook. In the page: at <code>plt.show()</code>, or at the end of the script for figures still open</td><td>where the script calls it</td></tr>
+    <tr><td>Look</td><td>a stress band beside each element; strips bent with their end rotations; linear y axis</td><td>strips shaded by stress; strips straight between nodes; log y axis when every load factor is positive</td></tr>
+  </tbody>
+</table></div>
+<p>Every number drawn is one the script holds: the engine's results, the minima and <code>classify_minima()</code>, and
+the mode's displacements from <code>ModeShape.at()</code>.</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+from cufsm_rs.plot import plot_section, plot_signature, plot_mode
+
+m = fsm.lipped_c(150, 64, 15, 1.5)
+mc = fsm.stress(m, P=fsm.first_yield(m, fy=450).Py)
+sig = fsm.signature(mc)
+plot_section(mc, node_numbers=True)
+plot_signature(sig, classify=True)
+plot_mode(sig, i_length=40)</code></pre>
+
+<h2 id="errors">Errors<a class="g-anchor" href="#errors" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Error</th><th>When</th></tr></thead>
+  <tbody>
+    <tr><td><code>ValueError</code></td><td>Invalid input; the message names the bad row or argument (<code>elem row 3 refers to node 12, which is not in node</code>, <code>fy = 0 must be positive</code>).</td></tr>
+    <tr><td id="py-MechanismError"><code>MechanismError</code></td><td>A subclass of <code>ValueError</code>: the elastic stiffness is not positive definite, the section has a mechanism at that length.</td></tr>
+    <tr><td><code>TypeError</code></td><td>A function that takes a model was given something else (<code>expected a cufsm_rs.Model, got list</code>).</td></tr>
+    <tr><td><code>IndexError</code></td><td><code>mode_shape</code> out of range, or asked for a mode that was not found.</td></tr>
+    <tr><td><code>NotImplementedError</code></td><td><b>Lite only:</b> something that needs numpy or matplotlib (whole-array arithmetic, <code>a[i, j]</code>, <code>ax=</code>). The message names the full runtime, and the console re-runs the script there.</td></tr>
+    <tr><td><code>MemoryError</code></td><td><b>In the page:</b> an output larger than the engine's memory can hold.</td></tr>
+    <tr><td><code>RuntimeError</code></td><td><b>In the page:</b> the engine stopped on an internal error (pip raises <code>PanicException</code> there). The console carries on; the next call works.</td></tr>
+  </tbody>
+</table></div>
+<p>Credit: CUFSM is by B.W. Schafer and co-workers at Johns Hopkins University; cufsm-rs and this package are an
+independent port, not affiliated with or endorsed by the CUFSM authors.
+<a href="https://github.com/ClearCalcs/pyCUFSM">pyCUFSM</a>, by ClearCalcs, is the earlier pure-Python port and prior
+work this project gratefully acknowledges. To publish results, cite CUFSM as its authors ask: Schafer, B.W., Ádány, S.,
+Li, Z., Jin, S., CUFSM v5.66, DOI 10.5281/zenodo.17771486; and for general end conditions, Schafer, B.W., Li, Z.,
+"Buckling analysis of cold-formed steel members with general boundary conditions using CUFSM: conventional and
+constrained finite strip methods", 20th International Specialty Conference on Cold-Formed Steel Structures, 2010,
+pp. 17-32.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="runtimes.html"><small>Previous</small>‹ MicroPython and full Python</a>
+    <a class="next" href="examples.html"><small>Next</small>Python examples ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

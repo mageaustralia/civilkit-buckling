@@ -1,0 +1,14 @@
+{
+  "id": "test.undeclared",
+  "name": "Undeclared",
+  "version": "1.0.0",
+  "civilkitApi": "^1.0",
+  "description": "Fixture: calls firstYield without declaring it",
+  "contributes": [
+    {
+      "point": "buckling.tool",
+      "id": "main"
+    }
+  ],
+  "capabilities": []
+}

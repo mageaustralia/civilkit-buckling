@@ -1,0 +1,233 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Worked examples and the Verified badge · CivilKit Buckling guide</title>
+<meta name="description" content="A worked example is a fixture model, the inputs, the numbers you expect, and where those numbers come from. When every example reproduces its numbers, the module is Verified. The rules are CivilKit Studio's, unchanged.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html" aria-current="page"><span class="g-num">6</span> Worked examples and the badge</a>
+      <ul>
+        <li><a href="#format">The format</a></li>
+        <li><a href="#running">How an example runs</a></li>
+        <li><a href="#matching">Matching rules</a></li>
+        <li><a href="#badge">The badge</a></li>
+        <li><a href="#sources">Sources: why expected values must not come from the engine</a></li>
+        <li><a href="#fixtures">Writing fixtures</a></li>
+      </ul></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Worked examples and the Verified badge</h1>
+<p class="g-lede">A worked example is a fixture model, the inputs, the numbers you expect, and where those numbers come
+from. When every example reproduces its numbers, the module is Verified. The rules are CivilKit Studio's, unchanged.</p>
+
+<h2 id="format">The format<a class="g-anchor" href="#format" aria-label="Link to this section">#</a></h2>
+<p><code>tests/worked-examples.json</code> (or the path in the manifest's <code>tests</code>) is a JSON list. Each example:</p>
+<div class="g-table"><table>
+  <thead><tr><th>Key</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>A short name, shown in the reports and in a failing install's status line.</td></tr>
+    <tr><td><code>input</code></td><td>The <code>inputs</code> dict <code>check</code> receives, as the form would send it (blank numbers are <code>""</code>).</td></tr>
+    <tr><td><code>model</code></td><td>The fixture: what <code>getModel</code> returns during this example, in the <a href="capabilities.html#model">model shape</a>, and the model every other capability works on by default. Optional for a module that never reads the model.</td></tr>
+    <tr><td><code>expected</code></td><td><code>{"result": [{"label", "value", "unit"?}, …]}</code>: the rows that must appear in what <code>check</code> returns.</td></tr>
+    <tr><td><code>source</code></td><td>Where the expected numbers come from: a hand calculation with its working, or a published example with its edition, example number and page. Shown under the example in every report.</td></tr>
+  </tbody>
+</table></div>
+<p>The complete file of the module on the <a href="index.html#main-py">overview</a>, with a hand calc:</p>
+<pre class="g-long"><code>[
+  {
+    "id": "lipped-c-150-60-40",
+    "input": {"fy":450},
+    "model": {
+      "mats": [{"id":100,"ex":200000,"ey":200000,"vx":0.3,"vy":0.3,"g":76923.0769231}],
+      "nodes": [
+        {"x":60,"z":40,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":30,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":20,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":10,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":0,"free":[1,1,1,1],"stress":1},
+        {"x":45,"z":0,"free":[1,1,1,1],"stress":1},
+        {"x":30,"z":0,"free":[1,1,1,1],"stress":1},
+        {"x":15,"z":0,"free":[1,1,1,1],"stress":1},
+        {"x":0,"z":0,"free":[1,1,1,1],"stress":1},
+        {"x":0,"z":37.5,"free":[1,1,1,1],"stress":1},
+        {"x":0,"z":75,"free":[1,1,1,1],"stress":1},
+        {"x":0,"z":112.5,"free":[1,1,1,1],"stress":1},
+        {"x":0,"z":150,"free":[1,1,1,1],"stress":1},
+        {"x":15,"z":150,"free":[1,1,1,1],"stress":1},
+        {"x":30,"z":150,"free":[1,1,1,1],"stress":1},
+        {"x":45,"z":150,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":150,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":140,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":130,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":120,"free":[1,1,1,1],"stress":1},
+        {"x":60,"z":110,"free":[1,1,1,1],"stress":1}
+      ],
+      "elems": [
+        {"i":0,"j":1,"t":1.5,"mat":100},
+        {"i":1,"j":2,"t":1.5,"mat":100},
+        {"i":2,"j":3,"t":1.5,"mat":100},
+        {"i":3,"j":4,"t":1.5,"mat":100},
+        {"i":4,"j":5,"t":1.5,"mat":100},
+        {"i":5,"j":6,"t":1.5,"mat":100},
+        {"i":6,"j":7,"t":1.5,"mat":100},
+        {"i":7,"j":8,"t":1.5,"mat":100},
+        {"i":8,"j":9,"t":1.5,"mat":100},
+        {"i":9,"j":10,"t":1.5,"mat":100},
+        {"i":10,"j":11,"t":1.5,"mat":100},
+        {"i":11,"j":12,"t":1.5,"mat":100},
+        {"i":12,"j":13,"t":1.5,"mat":100},
+        {"i":13,"j":14,"t":1.5,"mat":100},
+        {"i":14,"j":15,"t":1.5,"mat":100},
+        {"i":15,"j":16,"t":1.5,"mat":100},
+        {"i":16,"j":17,"t":1.5,"mat":100},
+        {"i":17,"j":18,"t":1.5,"mat":100},
+        {"i":18,"j":19,"t":1.5,"mat":100},
+        {"i":19,"j":20,"t":1.5,"mat":100}
+      ],
+      "springs": [],
+      "constraints": []
+    },
+    "expected": {"result":[{"label":"Py","value":236.25,"unit":"kN"}]},
+    "source": "Hand calc: lipped C 150 x 60 x 40 mm (centreline), t = 1.5 mm, sharp corners. A = (150 + 2 x 60 + 2 x 40) x 1.5 = 525 mm2; Py = A fy = 525 x 450 = 236 250 N = 236.25 kN."
+  }
+]</code></pre>
+
+<h2 id="running">How an example runs<a class="g-anchor" href="#running" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The module is loaded afresh for each example, so nothing carries over from the one before.</li>
+  <li><code>check(input)</code> runs with the example's <code>model</code> behind every capability. Nothing is solved:
+    <code>hasResults()</code> is <code>False</code> and <code>getResults()</code> is empty. A
+    <code>proposeModel</code> call is recorded, never applied.</li>
+  <li>Anything that stops the run (a Python error, an undeclared capability, a model the engine refuses) becomes that
+    example's only diff, and the other examples still run. For example, a fixture with a zero-thickness element fails
+    with <code>element 1 has thickness 0</code>.</li>
+  <li><code>build_ui</code> is not part of the test.</li>
+</ul>
+
+<h2 id="matching">Matching rules<a class="g-anchor" href="#matching" aria-label="Link to this section">#</a></h2>
+<p>Each expected row is looked up in the result by its <code>label</code>:</p>
+<div class="g-table"><table>
+  <thead><tr><th>Expected</th><th>Passes when</th><th>Diff when not</th></tr></thead>
+  <tbody>
+    <tr><td>a number</td><td>the result's value is a number within 0.1 % of it (an absolute floor of 1e-9 for expected values near zero)</td><td class="wrap"><code>Py: expected 240, got 236.25</code></td></tr>
+    <tr><td>a string</td><td>the value, as text, is exactly the same</td><td class="wrap"><code>Governs: expected "local", got "distortional"</code></td></tr>
+    <tr><td>a <code>unit</code></td><td>the result row's unit is exactly the same string (<code>mm²</code> is not <code>mm2</code>)</td><td class="wrap"><code>A: expected unit mm2, got mm²</code></td></tr>
+    <tr><td>any row</td><td>a row with that label exists</td><td class="wrap"><code>Lcrl: missing from result</code></td></tr>
+  </tbody>
+</table></div>
+<p>Rows the module returns beyond the expected ones are ignored, so an example can pin the two numbers you can prove and
+leave the rest. Leave out <code>unit</code> to skip the unit check for a row. Labels must match exactly, so keep the
+labels in a module stable once its examples are written.</p>
+<p>0.1 % is tight on purpose. If your module rounds what it displays, round to enough figures: five significant figures
+is plenty; two decimal places on a value like 0.0123 is not.</p>
+
+<h2 id="badge">The badge<a class="g-anchor" href="#badge" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li><b>Verified:</b> at least one example, and every example passes.</li>
+  <li><b>Community:</b> anything else: no examples (or an empty list), a failing example, a run that stopped, or a file
+    that is not a JSON list.</li>
+</ul>
+<p>The app decides it when a module is installed, by running the examples in the sandbox in this browser, one at a time,
+each within the usual 20-second limit; the first failure ends it, and the status line names that example and its diff.
+The builder's <span class="ui">Test</span> and the <a href="cli.html#test">command line</a> run every example and report
+each.</p>
+
+<h3 id="checks-nothing">"Checks nothing yet"<a class="g-anchor" href="#checks-nothing" aria-label="Link to this section">#</a></h3>
+<p>An example whose <code>expected.result</code> is empty has nothing to compare, so it passes. By Studio's rule it
+still counts toward Verified. The builder flags it under the example, <code>This example states no expected numbers,
+so it checks nothing yet.</code>, and its <span class="ui">Use the current model as a fixture</span> button always
+starts an example that way, for you to fill in. The command line does not warn, so look for empty
+<code>expected</code> lists when you review a module. A Verified badge resting on an empty example proves only that the
+module ran.</p>
+
+<h2 id="sources">Sources: why expected values must not come from the engine<a class="g-anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<div class="g-rule"><p>Never copy the engine's output, or your module's, into <code>expected</code>. A test that
+compares the engine with itself always passes and proves nothing. The expected numbers must come from somewhere a
+checker can follow without running this app.</p></div>
+<p>Good sources, roughly in order of strength:</p>
+<ul>
+  <li><b>A hand calculation</b> you can show in full in <code>source</code>: the area and squash load of a sharp-cornered
+    section (the centreline length times t), a DSM strength from given Pcr values, a property of a single plate.</li>
+  <li><b>A published design example</b>: the edition, the example number, and its inputs. The
+    <a href="reference-modules.html#dsm-compression">DSM compression</a> module uses the AISI <i>Direct Strength Method
+    Design Guide</i> (CF06-1, 2006), Examples 8.1-4, 8.1-5 and 8.5-3.</li>
+  <li><b>A published reference model with its recorded output</b>: CUFSM's own template run in its original code, or a
+    finite strip curve shipped with a design guide. The <a href="reference-modules.html#section-rounded-cz">Rounded C /
+    Z</a> module's examples are CUFSM's template, run in Octave, with the properties it recorded.</li>
+</ul>
+<p><b>Printed precision.</b> A guide prints two to four significant figures, and the tolerance is 0.1 %. Work the
+guide's own equations from its own printed inputs to more digits, put the working in your README, and state the printed
+value beside it, as the DSM compression README does (Pnl = 19.403 kip, which the guide prints as 19.4). Expected values
+are then the guide's equations, not your module's.</p>
+<p><b>Units.</b> Fixtures are in N, mm and MPa. Convert a published example once, state the factors in
+<code>source</code> (1 in = 25.4 mm, 1 ksi = 6.894757 MPa, 1 kip = 4.448222 kN), and convert the expected values the
+same way.</p>
+<p><b>Buckling values.</b> A minimum on a signature curve depends on the lengths it is solved at. A fixture that keeps
+the source's own lengths (in <code>analysis.lengths</code>) reproduces the source's minima; one with other lengths finds
+a slightly different minimum. The <a href="tutorial.html#step-8">tutorial's second example</a> does this.</p>
+
+<h2 id="fixtures">Writing fixtures<a class="g-anchor" href="#fixtures" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>In the builder, <span class="ui">Use the current model as a fixture</span> copies the section on screen, its loads,
+    fy and analysis settings into a new example, with the preview's inputs. Shape the section in the app first.</li>
+  <li>Include <code>springs</code> and <code>constraints</code> (empty lists are fine): a capability given a model
+    without them stops with <code>Cannot read properties of undefined (reading 'flat')</code>.</li>
+  <li>Element node indices are 0-based; the app's node 1 is <code>0</code>.</li>
+  <li>Keep fixtures as small as the check allows: a fixture is part of the bundle, and every example re-solves it.</li>
+  <li>One example per behaviour worth proving: each branch of a code check (braced and unbraced, local and distortional
+    governing) is a separate example.</li>
+</ul>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="ui.html"><small>Previous</small>‹ UI reference</a>
+    <a class="next" href="cli.html"><small>Next</small>The ckext command line ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

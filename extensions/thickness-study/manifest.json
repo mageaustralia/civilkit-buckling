@@ -1,0 +1,11 @@
+{
+  "id": "civilkit.thickness-study",
+  "name": "Thickness study",
+  "version": "1.0.0",
+  "civilkitApi": "^1.0",
+  "description": "How local and distortional buckling of the current section change with the sheet thickness, and the thinnest thickness that meets a target: a full engine solve per thickness, log-scale charts, a table, the section drawn at its yield stress, and the result offered back to the analysis.",
+  "author": "CivilKit",
+  "license": "MIT",
+  "contributes": [{ "point": "buckling.tool", "id": "thickness-study" }],
+  "capabilities": ["getModel", "firstYield", "stress", "signature", "modes", "proposeModel"]
+}

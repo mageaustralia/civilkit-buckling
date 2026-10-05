@@ -1,0 +1,495 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Tutorial: your first module · CivilKit Buckling guide</title>
+<meta name="description" content="In the app's module builder, from the starter to a Verified module you can export and share: first yield, the reference stress at the squash load, the signature curve, and its first minimum as Pcrl / Py. About half an hour, with no installation.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html" aria-current="page"><span class="g-num">3</span> Tutorial: your first module</a>
+      <ul>
+        <li><a href="#step-1">1. Open the builder and run the starter</a></li>
+        <li><a href="#step-2">2. Name it and declare what it calls</a></li>
+        <li><a href="#step-3">3. Local buckling from the signature curve</a></li>
+        <li><a href="#step-4">4. Draw the curve</a></li>
+        <li><a href="#step-5">5. When it goes wrong</a></li>
+        <li><a href="#step-6">6. The full view</a></li>
+        <li><a href="#step-7">7. A worked example: a hand calc that proves it</a></li>
+        <li><a href="#step-8">8. A second example from a published source</a></li>
+        <li><a href="#step-9">9. Export, check and install</a></li>
+        <li><a href="#step-10">10. Fork an installed module</a></li>
+        <li><a href="#final">The finished main.py</a></li>
+      </ul></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Tutorial: your first module</h1>
+<p class="g-lede">In the app's module builder, from the starter to a Verified module you can export and share: first
+yield, the reference stress at the squash load, the signature curve, and its first minimum as Pcrl / Py. About half
+an hour, with no installation.</p>
+
+<div class="g-note">
+<p>You need a desktop or tablet browser (the builder works on a phone, but code is easier to write on a larger screen)
+and a little Python. The numbers below are for the app's default section, a lipped C 150 × 60 × 40 mm (centreline),
+t = 1.5 mm, fy = 450 MPa. Reload the app to get it back.</p>
+<p>Keep the <a href="capabilities.html">capability reference</a> and the <a href="ui.html">UI reference</a> open beside
+this page.</p>
+</div>
+
+<h2 id="step-1">1. Open the builder and run the starter<a class="g-anchor" href="#step-1" aria-label="Link to this section">#</a></h2>
+<p>Open <span class="ui">Extensions</span> (on a phone, <span class="ui">More</span> › <span class="ui">Extensions</span>)
+and press <span class="ui">New module…</span>. The builder opens with three tabs (<span class="ui">main.py</span>,
+<span class="ui">manifest</span>, <span class="ui">worked examples</span>), the tools <span class="ui">Run</span>,
+<span class="ui">Test</span>, <span class="ui">Export .ckext</span> and <span class="ui">⤢ Full view</span>, and a
+<span class="ui">Preview</span> pane. <code>main.py</code> holds the starter:</p>
+<pre class="g-long"><code class="language-python"># A CivilKit Buckling module: build_ui draws the form,
+# check computes. Every engineering number comes from a
+# civilkit capability (the engine); this file orchestrates.
+# Units: N, mm, MPa. Declare each capability you call
+# in the manifest.
+import json, civilkit
+
+
+def call(name, arg=None):
+    f = getattr(civilkit, name)
+    return json.loads(f(json.dumps(arg)) if arg is not None else f())
+
+
+def num(inputs, key, default):
+    v = inputs.get(key)
+    if v is None or v == "":
+        return default
+    return float(v)
+
+
+def sig(v):
+    # 5 significant figures, for display (finer than the
+    # worked examples' 0.1 % tolerance)
+    return float("%.5g" % v) if v else v
+
+
+def build_ui(inputs, result, calcLines):
+    kids = [
+        {"type": "text", "value": "First yield of the section in the analysis, from the engine."},
+        {"type": "field", "id": "fy", "label": "fy (MPa), blank: the analysis's",
+         "inputType": "number", "default": inputs.get("fy", "")},
+        {"type": "button", "id": "run", "label": "Run", "action": "run-check"},
+    ]
+    if result:
+        kids.append({"type": "result", "items": result})
+    if calcLines:
+        kids.append({"type": "calc", "lines": calcLines})
+    return {"type": "panel", "title": "My module", "children": kids}
+
+
+def check(inputs):
+    fy = num(inputs, "fy", call("getModel").get("fy"))
+    if not fy or fy &lt;= 0:
+        raise ValueError("fy must be a positive stress (MPa)")
+    props = call("sectionProps", {})
+    y = call("firstYield", {"fy": fy})
+    py = y["Py"] / 1000.0
+    return {
+        "result": [
+            {"label": "fy", "value": fy, "unit": "MPa"},
+            {"label": "A", "value": sig(props["A"]), "unit": "mm²"},
+            {"label": "Py", "value": sig(py), "unit": "kN"},
+            {"label": "My (x axis)", "value": sig(y["Mxx"] / 1e6), "unit": "kN·m"},
+        ],
+        "calcLines": [
+            {"label": "Squash load",
+             "eq": "Py = fy A = %g × %g / 1000 = %.4g kN" % (fy, props["A"], py)},
+        ],
+    }</code></pre>
+<p>Read it top to bottom:</p>
+<ul>
+  <li><code>call</code> wraps the convention every capability follows: the argument goes in as a JSON string, the answer
+    comes back as one. <code>call("firstYield", {"fy": fy})</code> returns a plain dict.</li>
+  <li><code>num</code> reads a number from the form, falling back to a default when the field is blank.</li>
+  <li><code>build_ui</code> returns the form: a <code>text</code> line, an <code>fy</code> field, a
+    <code>Run</code> button whose <code>action</code> is <code>"run-check"</code>, and, after a run, the
+    <code>result</code> rows and the <code>calc</code> lines.</li>
+  <li><code>check</code> asks the engine for the section properties and first yield, and returns result rows and one
+    calc line. It types no engineering number of its own.</li>
+</ul>
+<p>Press <span class="ui">Run</span> in the tools row (or <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd>). The
+preview shows the module's form, running in the sandbox on the section in your analysis. Leave fy blank and press the
+preview's own <span class="ui">Run</span>.</p>
+<p class="g-see">four result rows, fy 450 MPa, A 525 mm², Py 236.25 kN and My (x axis) 10.773 kN·m, and one calc line,
+<code>Py = fy A = 450 × 525 / 1000 = 236.3 kN</code>.</p>
+<p>A = 525 mm² is easy to check by hand: the centreline is 150 + 2 × 60 + 2 × 40 = 350 mm long and t = 1.5 mm. That
+check is the start of a <a href="#step-7">worked example</a>.</p>
+
+<h2 id="step-2">2. Name it and declare what it calls<a class="g-anchor" href="#step-2" aria-label="Link to this section">#</a></h2>
+<p>Open the <span class="ui">manifest</span> tab. It is a form that writes <code>manifest.json</code>, shown underneath.
+Set:</p>
+<ul>
+  <li><b>id</b>: <code>yourname.yield-and-local</code>. Reverse-domain and unique: a new id installs as a new module.</li>
+  <li><b>Name</b>: <code>Yield and local buckling</code>.</li>
+  <li><b>Description</b>: one line on what it does.</li>
+</ul>
+<p>The <b>Capabilities</b> checklist is what the module may call; anything else is refused. This module will call
+<code>getModel</code>, <code>firstYield</code>, <code>stress</code> and <code>signature</code>. Leave those ticked, tick
+<code>stress</code> and <code>signature</code>, and untick <code>sectionProps</code>, which it will no longer use. The
+manifest now reads:</p>
+<pre><code>{
+  "id": "yourname.yield-and-local",
+  "name": "Yield and local buckling",
+  "version": "0.1.0",
+  "civilkitApi": "^1.0",
+  "description": "First yield of the section, and its first signature-curve minimum as Pcrl / Py.",
+  "license": "MIT",
+  "contributes": [{ "point": "buckling.tool", "id": "main" }],
+  "capabilities": ["getModel", "firstYield", "stress", "signature"]
+}</code></pre>
+<p>(The builder writes the capabilities in its own order; the order does not matter.)</p>
+<div class="g-note"><p>Skip this step and run the next one, and the module stops at its first undeclared call, with the
+error box in the preview saying <code>My module: Capability 'stress' not declared in the module manifest</code>. Tick
+the box and run again.</p></div>
+
+<h2 id="step-3">3. Local buckling from the signature curve<a class="g-anchor" href="#step-3" aria-label="Link to this section">#</a></h2>
+<p>The idea, as in the Direct Strength Method: ask the engine for the squash load Py, set the reference stress to
+uniform compression at P = Py, and solve the signature curve. Each load factor on that curve is then Pcr / Py, and its
+first minimum (the shortest half-wavelength) is local buckling on a section like this one.</p>
+<p>Back on <span class="ui">main.py</span>, add this function above <code>build_ui</code>. It takes the lengths from the
+analysis, or makes 50 log-spaced ones if there are none (a worked example's fixture may have none):</p>
+<pre><code class="language-python">def lengths_of(model):
+    # the analysis's lengths, or 50 from big/10 to 1000 big
+    ls = (model.get("analysis") or {}).get("lengths") or []
+    if len(ls) &gt;= 2:
+        return ls
+    xs = [n["x"] for n in model["nodes"]]
+    zs = [n["z"] for n in model["nodes"]]
+    big = max(max(xs) - min(xs), max(zs) - min(zs))
+    return [big / 10 * 10 ** (4 * k / 49) for k in range(50)]</code></pre>
+<p>Then replace <code>check</code> with:</p>
+<pre class="g-long"><code class="language-python">def check(inputs):
+    model = call("getModel")
+    fy = num(inputs, "fy", model.get("fy"))
+    if not fy or fy &lt;= 0:
+        raise ValueError("fy must be a positive stress (MPa)")
+    Py = call("firstYield", {"fy": fy})["Py"]          # N
+    st = call("stress", {"P": Py})["stress"]           # MPa per node
+    ref = dict(model)
+    ref["nodes"] = [dict(n, stress=s) for n, s in zip(model["nodes"], st)]
+    s = call("signature", {"model": ref, "lengths": lengths_of(model)})
+    first = s["minima"][0]
+    return {
+        "result": [
+            {"label": "A", "value": sig(Py / fy), "unit": "mm²"},
+            {"label": "Py", "value": sig(Py / 1000), "unit": "kN"},
+            {"label": "Lcrl", "value": sig(first["length"]), "unit": "mm"},
+            {"label": "Pcrl/Py", "value": sig(first["lf"])},
+            {"label": "Pcrl", "value": sig(first["lf"] * Py / 1000), "unit": "kN"},
+        ],
+        "calcLines": [
+            {"label": "Squash load (engine first yield)",
+             "eq": "Py = A fy = %.5g mm² × %g MPa = %.5g kN" % (Py / fy, fy, Py / 1000)},
+            {"label": "Local buckling (first minimum of the curve)",
+             "eq": "Pcrl = λ Py = %.5g × %.5g = %.5g kN at L = %.4g mm"
+                   % (first["lf"], Py / 1000, first["lf"] * Py / 1000, first["length"])},
+        ],
+    }</code></pre>
+<p>What each call does:</p>
+<ul>
+  <li><code>getModel</code> returns the section in the analysis, its fy and its lengths (<a href="capabilities.html#cap-getModel">reference</a>).</li>
+  <li><code>firstYield</code> returns the first-yield actions; <code>Py</code> is in N (<a href="capabilities.html#cap-firstYield">reference</a>).</li>
+  <li><code>stress</code> returns the stress at every node for the given actions, in MPa (<a href="capabilities.html#cap-stress">reference</a>).
+    The copy <code>ref</code> carries those stresses, and <code>signature</code> solves it rather than the analysis's own
+    reference stress.</li>
+  <li><code>signature</code> returns the curve and its minima (<a href="capabilities.html#cap-signature">reference</a>).
+    <code>A = Py / fy</code> is the engine's area, not one computed here.</li>
+</ul>
+<p>Press <span class="ui">Run</span>, then the preview's <span class="ui">Run</span>.</p>
+<p class="g-see">A 525 mm², Py 236.25 kN, Lcrl 115.18 mm, Pcrl/Py 0.22348 and Pcrl 52.797 kN, and two calc lines.</p>
+<p>The minimum's length and value depend on the lengths in the analysis (the default is 90 lengths from 10 to
+5000 mm). On the 50 lengths <code>lengths_of</code> makes when the analysis has none, the same section gives
+Lcrl 118.59 mm and Pcrl/Py 0.22352: a minimum found on a grid is only as fine as the grid.</p>
+
+<h2 id="step-4">4. Draw the curve<a class="g-anchor" href="#step-4" aria-label="Link to this section">#</a></h2>
+<p><code>build_ui</code> only sees what <code>check</code> returned as result rows and calc lines. To draw the curve,
+keep it in a module-level variable: the host calls <code>build_ui</code> straight after <code>check</code>, in the same
+Python session, so the variable is still there. Add under the import line:</p>
+<pre><code class="language-python">LAST = {"curve": [], "minima": []}   # the last run, for build_ui</code></pre>
+<p>in <code>check</code>, straight after the <code>signature</code> call:</p>
+<pre><code class="language-python">    LAST["curve"], LAST["minima"] = s["curve"], s["minima"]</code></pre>
+<p>and make <code>build_ui</code>:</p>
+<pre><code class="language-python">def build_ui(inputs, result, calcLines):
+    kids = [
+        {"type": "text", "value": "First yield, and the first minimum of the signature curve as Pcrl / Py."},
+        {"type": "field", "id": "fy", "label": "fy (MPa), blank: the analysis's",
+         "inputType": "number", "default": inputs.get("fy", "")},
+        {"type": "button", "id": "run", "label": "Run", "action": "run-check"},
+    ]
+    if result:
+        kids.append({"type": "result", "items": result})
+    if LAST["curve"]:
+        kids.append({"type": "buckling.signature", "title": "Signature curve (λ = Pcr / Py)",
+                     "curve": LAST["curve"], "minima": LAST["minima"],
+                     "xlabel": "half-wavelength (mm)", "ylabel": "Pcr / Py"})
+    if calcLines:
+        kids.append({"type": "calc", "lines": calcLines})
+    return {"type": "panel", "title": "Yield and local buckling", "children": kids}</code></pre>
+<p><code>buckling.signature</code> is a node the Buckling host adds: the app's own signature chart, with its log axis and
+minima markers (<a href="ui.html#node-buckling.signature">reference</a>). Run it.</p>
+<p class="g-see">the same rows, and under them the signature curve on log axes, from 10 to 5000 mm, with its three
+minima marked (0.223 at 115 mm, 0.592 at 1327 mm, and 0.115 at the 5000 mm end, where global buckling takes over).</p>
+<figure class="g-shot"><img src="img/tutorial-run.png" width="1280" height="860" loading="lazy"
+  alt="The module builder: main.py on the left, and the preview on the right with the Yield and local buckling form, five result rows and the signature curve with three minima marked.">
+  <figcaption>The builder in its full view, with the finished module run on the default section.</figcaption></figure>
+
+<h2 id="step-5">5. When it goes wrong<a class="g-anchor" href="#step-5" aria-label="Link to this section">#</a></h2>
+<p>Errors show in the preview's error box, and a Python error also marks its line in the editor: the line number turns
+red, the line is shaded, and a message under the editor reads <code>Line N: …</code>. Click the message to put the
+caret on that line. Try it: change <code>s["minima"][0]</code> to <code>s["minima"][O]</code> (a letter O) and run.</p>
+<p class="g-see">the error box starts <code>Yield and local buckling: Traceback (most recent call last):</code> and ends
+<code>NameError: name 'O' isn't defined</code>, and the editor marks line 66 with
+<code>Line 66: NameError: name 'O' isn't defined</code>.</p>
+<p>A syntax error (say, the colon dropped from <code>def check(inputs):</code>) is marked the same way, as
+<code>SyntaxError: invalid syntax</code>, on the line where the parser gave up. Errors raised by the host have no Python
+line: an undeclared capability (step 2), or an engine refusal such as
+<code>a length is not a positive finite number</code>. The <a href="faq.html#errors">error list</a> has the common ones.
+Put the <code>0</code> back before going on.</p>
+<p>Editing keys: <kbd>Tab</kbd> and <kbd>Shift</kbd>+<kbd>Tab</kbd> indent and outdent by four spaces (the whole
+selection when there is one), <kbd>Enter</kbd> keeps the indentation and adds a level after a colon, and
+<kbd>Esc</kbd> then <kbd>Tab</kbd> moves the focus out of the editor.</p>
+
+<h2 id="step-6">6. The full view<a class="g-anchor" href="#step-6" aria-label="Link to this section">#</a></h2>
+<p><span class="ui">⤢ Full view</span> puts the builder over the whole window, with the editor beside the preview on a
+wide screen. <span class="ui">✕ Close full view</span> or <kbd>Esc</kbd> returns. The builder remembers your choice
+for next time, in this browser.</p>
+<p>Your work is saved as you type, as one draft in this browser. <span class="ui">New module…</span> brings it back
+(<code>Your draft from … is restored.</code>), with <span class="ui">Start a new module</span> if you want the starter
+instead; that toast has <span class="ui">Undo</span>. Export the module (step 9) to keep it anywhere else.</p>
+
+<h2 id="step-7">7. A worked example: a hand calc that proves it<a class="g-anchor" href="#step-7" aria-label="Link to this section">#</a></h2>
+<p>A module earns the <b>Verified</b> badge when every worked example reproduces numbers someone can check without the
+engine. Open the <span class="ui">worked examples</span> tab and press <span class="ui">Use the current model as a
+fixture</span>.</p>
+<p class="g-see">the status line <code>Added example-1 with the section on screen as its model. Fill in its expected
+numbers and their source.</code>, and a JSON example: the preview's inputs (<code>{"fy":""}</code>), the whole model on
+screen (materials, 21 nodes, 20 elements, loads, fy and the analysis settings), <code>"expected": {"result": []}</code>
+and an empty <code>source</code>.</p>
+<p>Press <span class="ui">Test</span> now.</p>
+<p class="g-see"><b>Verified</b>, <code>1 of 1 reproduce their numbers.</code>, and under the example a warning:
+<code>This example states no expected numbers, so it checks nothing yet.</code></p>
+<p>An empty expectation passes trivially, which is why the builder warns. The builder never writes the engine's own
+results in as expectations: those would only prove the engine agrees with itself. Fill in what you can show by hand.
+For this section A and Py are exact: the corners are sharp, so the area is the centreline length times t.</p>
+<pre><code>"id": "default-lipped-c-yield",
+"expected": {"result": [
+  {"label": "A", "value": 525, "unit": "mm²"},
+  {"label": "Py", "value": 236.25, "unit": "kN"}
+]},
+"source": "Hand calc: lipped C 150 x 60 x 40 mm centreline, t = 1.5 mm, sharp corners. A = (150 + 2 x 60 + 2 x 40) x 1.5 = 525 mm2; Py = A fy = 525 x 450 = 236 250 N = 236.25 kN."</code></pre>
+<p>Each expected row is matched to the result row with the same <code>label</code>: numbers within 0.1 %, and the
+<code>unit</code> exactly (so <code>mm²</code> with the superscript, as the module writes it). Test again.</p>
+<p class="g-see"><b>Verified</b>, <code>1 of 1 reproduce their numbers.</code>, a ✓ beside
+<code>default-lipped-c-yield</code>, and the source under it. Change 236.25 to 240 and test, and you get
+<b>Community</b>, <code>0 of 1</code>, a ✗ and the diff <code>Py: expected 240, got 236.25</code>.</p>
+<figure class="g-shot"><img src="img/tutorial-test.png" width="526" height="121" loading="lazy"
+  alt="The Test report: Worked examples, a Verified badge, 1 of 1 reproduce their numbers, a tick beside default-lipped-c-yield and its hand-calc source.">
+  <figcaption>The Test report once the example states its hand-calc numbers.</figcaption></figure>
+
+<h2 id="step-8">8. A second example from a published source<a class="g-anchor" href="#step-8" aria-label="Link to this section">#</a></h2>
+<p>The yield example does not test the buckling half of the module. For that you need a buckling value someone else
+published. The AISI <i>Direct Strength Method Design Guide</i> (CF06-1, 2006) ships its CUFSM models; its Example
+8.5-3, the 8ZS2.25x059 Z, has its local minimum at 5.9 in (149.86 mm), with Pcrl / Py = 0.157494 on the guide's own
+CUFSM curve, and prints Py = 45.23 kip (201.19 kN). The DSM compression reference module already carries that model,
+converted to mm and MPa: copy its <code>model</code> from the example <code>dsm-guide-8.5-3-z-braced-signature</code>
+(open DSM compression, <span class="ui">View code</span>, <span class="ui">worked examples</span>) into a second
+example:</p>
+<pre><code>{
+  "id": "dsm-guide-z-local",
+  "input": {"fy": 379.21165112425984},
+  "model": { … the Z from dsm-compression, with its 50 lengths … },
+  "expected": {"result": [
+    {"label": "Py", "value": 201.19, "unit": "kN"},
+    {"label": "Lcrl", "value": 149.86, "unit": "mm"},
+    {"label": "Pcrl/Py", "value": 0.157494}
+  ]},
+  "source": "AISI Direct Strength Method Design Guide (CF06-1, 2006), Example 8.5-3, 8ZS2.25x059, Fy = 55 ksi: Py = 45.23 kip = 201.19 kN as printed; the local minimum of the guide's own CUFSM curve (zwlip_P.mat) is 0.157494 at 5.9 in = 149.86 mm (printed as 0.16)."
+}</code></pre>
+<p>fy = 55 ksi is 379.21 MPa. The example passes because the fixture keeps the guide's lengths, so the minimum lands on
+the guide's own grid point. <a href="worked-examples.html#sources">Good sources</a> has more on choosing examples.</p>
+
+<h2 id="step-9">9. Export, check and install<a class="g-anchor" href="#step-9" aria-label="Link to this section">#</a></h2>
+<p>Press <span class="ui">Export .ckext</span>. The builder checks the bundle the way the installer will, and downloads
+it, named after the last part of the id.</p>
+<p class="g-see"><code>Exported yield-and-local.ckext (3752 bytes). Install it from the Extensions list, or check it
+with: node tools/ckext.mjs test yield-and-local.ckext</code> (the size depends on your examples).</p>
+<p>Install it: <span class="ui">‹ Extensions</span>, then <span class="ui">Choose a file…</span> (or drop the file on the
+box). The status line reads <code>Installed Yield and local buckling 0.1.0 (Verified).</code> and the module is in
+<span class="ui">Installed</span>, ready to <span class="ui">Open</span>.</p>
+<p>If you have a checkout of the app's source, the command line runs the same examples without a browser, and prints
+what one run of the module produced:</p>
+<pre><code>$ node tools/ckext.mjs test yield-and-local.ckext
+verified
+Yield and local buckling 0.1.0 (yourname.yield-and-local)
+worked examples: 1 of 1 pass
+  pass default-lipped-c-yield
+form: fy; buttons: Run
+run on {"fy":""} (the first worked example and its fixture):
+  A = 525 mm²
+  Py = 236.25 kN
+  Lcrl = 115.18 mm
+  Pcrl/Py = 0.22348
+  Pcrl = 52.797 kN
+  …</code></pre>
+<p><a href="cli.html">The ckext command line</a> covers it. The finished module, with both examples, is
+<a href="files/yield-and-local.ckext" download>yield-and-local.ckext</a>; install it and use
+<span class="ui">View code</span> to compare with yours.</p>
+
+<h2 id="step-10">10. Fork an installed module<a class="g-anchor" href="#step-10" aria-label="Link to this section">#</a></h2>
+<p>The quickest way to learn a pattern is to start from a module that has it. Install <b>DSM compression</b> from the
+store, <span class="ui">Open</span> it, press <span class="ui">View code</span>, then
+<span class="ui">Edit &amp; run as a fork</span>.</p>
+<p class="g-see">the builder, running the copy, with the status <code>Forked DSM compression: this copy has the id
+civilkit.dsm-compression-fork.</code> If the builder held your draft, a toast says <code>The fork replaced your
+previous draft.</code> with <span class="ui">Undo</span>.</p>
+<p>The fork has its own id and name, so exporting and installing it keeps the original. Change the id to your own
+before you share it.</p>
+
+<h2 id="final">The finished main.py<a class="g-anchor" href="#final" aria-label="Link to this section">#</a></h2>
+<pre class="g-long"><code class="language-python"># Yield and local buckling: Py from the engine, then the signature
+# curve with the reference stress set to uniform compression at Py,
+# so each load factor is Pcr / Py. Units: N, mm, MPa.
+import json, civilkit
+
+LAST = {"curve": [], "minima": []}   # the last run, for build_ui
+
+
+def call(name, arg=None):
+    f = getattr(civilkit, name)
+    return json.loads(f(json.dumps(arg)) if arg is not None else f())
+
+
+def num(inputs, key, default):
+    v = inputs.get(key)
+    if v is None or v == "":
+        return default
+    return float(v)
+
+
+def sig(v):
+    # 5 significant figures, for display
+    return float("%.5g" % v) if v else v
+
+
+def lengths_of(model):
+    # the analysis's lengths, or 50 from big/10 to 1000 big
+    ls = (model.get("analysis") or {}).get("lengths") or []
+    if len(ls) &gt;= 2:
+        return ls
+    xs = [n["x"] for n in model["nodes"]]
+    zs = [n["z"] for n in model["nodes"]]
+    big = max(max(xs) - min(xs), max(zs) - min(zs))
+    return [big / 10 * 10 ** (4 * k / 49) for k in range(50)]
+
+
+def build_ui(inputs, result, calcLines):
+    kids = [
+        {"type": "text", "value": "First yield, and the first minimum of the signature curve as Pcrl / Py."},
+        {"type": "field", "id": "fy", "label": "fy (MPa), blank: the analysis's",
+         "inputType": "number", "default": inputs.get("fy", "")},
+        {"type": "button", "id": "run", "label": "Run", "action": "run-check"},
+    ]
+    if result:
+        kids.append({"type": "result", "items": result})
+    if LAST["curve"]:
+        kids.append({"type": "buckling.signature", "title": "Signature curve (λ = Pcr / Py)",
+                     "curve": LAST["curve"], "minima": LAST["minima"],
+                     "xlabel": "half-wavelength (mm)", "ylabel": "Pcr / Py"})
+    if calcLines:
+        kids.append({"type": "calc", "lines": calcLines})
+    return {"type": "panel", "title": "Yield and local buckling", "children": kids}
+
+
+def check(inputs):
+    model = call("getModel")
+    fy = num(inputs, "fy", model.get("fy"))
+    if not fy or fy &lt;= 0:
+        raise ValueError("fy must be a positive stress (MPa)")
+    Py = call("firstYield", {"fy": fy})["Py"]          # N
+    st = call("stress", {"P": Py})["stress"]           # MPa per node
+    ref = dict(model)
+    ref["nodes"] = [dict(n, stress=s) for n, s in zip(model["nodes"], st)]
+    s = call("signature", {"model": ref, "lengths": lengths_of(model)})
+    LAST["curve"], LAST["minima"] = s["curve"], s["minima"]
+    first = s["minima"][0]
+    return {
+        "result": [
+            {"label": "A", "value": sig(Py / fy), "unit": "mm²"},
+            {"label": "Py", "value": sig(Py / 1000), "unit": "kN"},
+            {"label": "Lcrl", "value": sig(first["length"]), "unit": "mm"},
+            {"label": "Pcrl/Py", "value": sig(first["lf"])},
+            {"label": "Pcrl", "value": sig(first["lf"] * Py / 1000), "unit": "kN"},
+        ],
+        "calcLines": [
+            {"label": "Squash load (engine first yield)",
+             "eq": "Py = A fy = %.5g mm² × %g MPa = %.5g kN" % (Py / fy, fy, Py / 1000)},
+            {"label": "Local buckling (first minimum of the curve)",
+             "eq": "Pcrl = λ Py = %.5g × %.5g = %.5g kN at L = %.4g mm"
+                   % (first["lf"], Py / 1000, first["lf"] * Py / 1000, first["length"])},
+        ],
+    }</code></pre>
+<p>Where to go next:</p>
+<ul>
+  <li>Classify the minimum with <code>modes</code> instead of taking the first one: the
+    <a href="reference-modules.html#dsm-compression">DSM compression</a> module skips minima that cFSM calls mostly
+    global.</li>
+  <li>Add a distortional minimum and the DSM strength equations, citing their clauses in the calc lines.</li>
+  <li>Draw the section stressed at Py with <a href="ui.html#node-buckling.section"><code>buckling.section</code></a>.</li>
+</ul>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="using.html"><small>Previous</small>‹ Using extensions</a>
+    <a class="next" href="capabilities.html"><small>Next</small>Capability reference ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

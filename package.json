@@ -1,0 +1,36 @@
+{
+  "name": "civilkit-buckling",
+  "description": "Elastic buckling of thin-walled members in the browser: the finite strip method (CUFSM, through cufsm-rs) compiled to WebAssembly. Part of CivilKit.",
+  "private": true,
+  "license": "Apache-2.0",
+  "homepage": "https://mageengineering.com.au/apps/buckling/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mageaustralia/civilkit-buckling.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mageaustralia/civilkit-buckling/issues"
+  },
+  "author": "Matthew Campbell",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "smoke": "node tests/browser/smoke.mjs",
+    "mobile": "node tests/browser/mobile.mjs",
+    "offline": "node tests/browser/offline.mjs",
+    "a11y": "node tests/browser/a11y.mjs",
+    "console": "node tests/browser/console.mjs",
+    "precache": "node tools/precache.mjs",
+    "pyodide": "node tools/fetch-pyodide.mjs",
+    "wasm": "node build-wasm.mjs",
+    "ckext": "node tools/ckext.mjs"
+  },
+  "devDependencies": {
+    "axe-core": "^4.13.0",
+    "fake-indexeddb": "^6.2.5",
+    "playwright": "1.63.0"
+  },
+  "bin": {
+    "ckext": "tools/ckext.mjs"
+  }
+}

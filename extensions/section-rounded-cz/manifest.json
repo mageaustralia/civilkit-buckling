@@ -1,0 +1,11 @@
+{
+  "id": "civilkit.section-rounded-cz",
+  "name": "Rounded C / Z section",
+  "version": "1.0.0",
+  "civilkitApi": "^1.0",
+  "description": "A lipped or plain C or Z section with rounded corners, meshed as CUFSM's template does, with its properties from the engine; offered to the analysis for you to use or dismiss.",
+  "author": "CivilKit",
+  "license": "MIT",
+  "contributes": [{ "point": "buckling.tool", "id": "section-rounded-cz" }],
+  "capabilities": ["sectionProps", "proposeModel"]
+}

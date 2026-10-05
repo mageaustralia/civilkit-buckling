@@ -1,0 +1,333 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Capability reference · CivilKit Buckling guide</title>
+<meta name="description" content="Every call a Buckling module can make to the engine and the app, exactly as built: its argument, what it returns, the units, the errors, and an example. Units are N, mm and MPa throughout; moments are N·mm and the bimoment N·mm².">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html" aria-current="page"><span class="g-num">4</span> Capability reference</a>
+      <ul>
+        <li><a href="#calling">Calling a capability</a></li>
+        <li><a href="#model">The model shape</a></li>
+        <li><a href="#cap-getModel">getModel()</a></li>
+        <li><a href="#cap-hasResults">hasResults()</a></li>
+        <li><a href="#cap-getResults">getResults()</a></li>
+        <li><a href="#cap-sectionProps">sectionProps(json)</a></li>
+        <li><a href="#cap-stress">stress(json)</a></li>
+        <li><a href="#cap-firstYield">firstYield(json)</a></li>
+        <li><a href="#cap-signature">signature(json)</a></li>
+        <li><a href="#cap-modes">modes(json)</a></li>
+        <li><a href="#cap-proposeModel">proposeModel(json)</a></li>
+        <li><a href="#cap-log">log(msg)</a></li>
+      </ul></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Capability reference</h1>
+<p class="g-lede">Every call a Buckling module can make to the engine and the app, exactly as built: its argument, what
+it returns, the units, the errors, and an example. Units are N, mm and MPa throughout; moments are N·mm and the
+bimoment N·mm².</p>
+
+<div class="g-table"><table>
+  <thead><tr><th>Capability</th><th>Gives</th></tr></thead>
+  <tbody>
+    <tr><td><a href="#cap-getModel"><code>getModel</code></a></td><td>The section on screen (or the worked example's fixture): materials, nodes, elements, springs, constraints, loads, fy, analysis settings.</td></tr>
+    <tr><td><a href="#cap-hasResults"><code>hasResults</code></a></td><td>Whether the app has a solved curve for the current model.</td></tr>
+    <tr><td><a href="#cap-getResults"><code>getResults</code></a></td><td>The app's solved curve and its classified minima.</td></tr>
+    <tr><td><a href="#cap-sectionProps"><code>sectionProps</code></a></td><td>A, centroid, Ixx, Izz, Ixz, principal axes, J, shear centre, Cw.</td></tr>
+    <tr><td><a href="#cap-stress"><code>stress</code></a></td><td>The stress at every node for given actions P, Mxx, Mzz, M11, M22, B.</td></tr>
+    <tr><td><a href="#cap-firstYield"><code>firstYield</code></a></td><td>The first-yield actions Py, Mxx, Mzz, M11, M22, B for a given fy.</td></tr>
+    <tr><td><a href="#cap-signature"><code>signature</code></a></td><td>A signature curve (or a general-BC curve), optionally with cFSM curves, and its minima.</td></tr>
+    <tr><td><a href="#cap-modes"><code>modes</code></a></td><td>The buckling modes at one length, with their cFSM classification.</td></tr>
+    <tr><td><a href="#cap-proposeModel"><code>proposeModel</code></a></td><td>Offer a section to the analysis; the user decides.</td></tr>
+    <tr><td><a href="#cap-log"><code>log</code></a></td><td>A line in the command line's report. Free: never declared.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="calling">Calling a capability<a class="g-anchor" href="#calling" aria-label="Link to this section">#</a></h2>
+<p><code>import civilkit</code> gives the host module. Each capability takes one argument, a JSON string, and returns a
+JSON string, as in CivilKit Studio. The exceptions are <code>hasResults</code>, which returns a Python
+<code>True</code> or <code>False</code>, and <code>log</code>, which returns nothing. A capability with no argument
+(<code>getModel</code>, <code>getResults</code>) is called with none. The starter's helper does both directions:</p>
+<pre><code class="language-python">def call(name, arg=None):
+    f = getattr(civilkit, name)
+    return json.loads(f(json.dumps(arg)) if arg is not None else f())</code></pre>
+<p>so <code>call("firstYield", {"fy": 450})</code> returns a dict. Every argument key is optional unless it says
+otherwise below; an argument of <code>{}</code> (or no argument) takes every default.</p>
+
+<h3 id="declaring">Declaring capabilities<a class="g-anchor" href="#declaring" aria-label="Link to this section">#</a></h3>
+<p>A module lists the capabilities it calls in its manifest:</p>
+<pre><code>"capabilities": ["getModel", "firstYield", "stress", "signature"]</code></pre>
+<p>A call to a capability that is not listed is refused with
+<code>Capability 'signature' not declared in the module manifest</code>, which ends that run (or fails that worked
+example). A name that is declared but that Buckling does not offer (a Studio capability, say) is refused with
+<code>Capability 'x' not granted</code>.
+<code>log</code> is the one capability that is always allowed. List what you call and nothing more: the list is what a
+reviewer reads to see what a module can touch, and the command line reports declared capabilities a run never
+used.</p>
+
+<h3 id="model-arg">The <code>model</code> argument<a class="g-anchor" href="#model-arg" aria-label="Link to this section">#</a></h3>
+<p><code>sectionProps</code>, <code>stress</code>, <code>firstYield</code>, <code>signature</code> and <code>modes</code>
+work on the current model (the one <code>getModel</code> returns), with its reference stresses, unless the argument
+carries a <code>model</code> of its own in the <a href="#model">model shape</a>. That is how a module solves a variant:
+a section it built, a copy with other thicknesses, or a copy with other node stresses. A model passed this way must
+have <code>mats</code>, <code>nodes</code>, <code>elems</code>, <code>springs</code> and <code>constraints</code>
+(the last two may be empty lists); it is validated first, and refused with the reason (see <a href="#errors">errors</a>).</p>
+
+<h3 id="errors">Errors end the call<a class="g-anchor" href="#errors" aria-label="Link to this section">#</a></h3>
+<p>When a capability refuses (an undeclared call, an invalid model, an engine error), the run stops with that message.
+In this version a Python <code>try</code> / <code>except</code> around the call does not catch it, so check your
+arguments before you call: a positive fy, at least two positive lengths, a model with every list present. The message
+reaches the user in the module's error box, and in a worked example it becomes that example's diff.</p>
+
+<h2 id="model">The model shape<a class="g-anchor" href="#model" aria-label="Link to this section">#</a></h2>
+<p><code>getModel</code> returns it, worked-example fixtures are written in it, and <code>proposeModel</code> takes it.
+It is CUFSM's model as plain data:</p>
+<pre><code>{
+  "units": "N-mm",
+  "mats":   [{"id": 100, "ex": 200000, "ey": 200000, "vx": 0.3, "vy": 0.3, "g": 76923.0769231}],
+  "nodes":  [{"x": 60, "z": 40, "free": [1, 1, 1, 1], "stress": 1}, …],
+  "elems":  [{"i": 0, "j": 1, "t": 1.5, "mat": 100}, …],
+  "springs": [],
+  "constraints": [],
+  "loads": {"P": 1, "Mxx": 0, "Mzz": 0, "M11": 0, "M22": 0, "B": 0, "restrained": false},
+  "fy": 450,
+  "analysis": {"solution": "signature", "bc": "S-S", "terms": 1, "neigs": 10, "lengths": [10, …, 5000]}
+}</code></pre>
+<div class="g-table"><table>
+  <thead><tr><th>Key</th><th>Meaning</th><th>Units</th></tr></thead>
+  <tbody>
+    <tr><td><code>mats[]</code></td><td>Orthotropic materials: <code>id</code> (CUFSM's mat#), <code>ex</code>, <code>ey</code>, <code>vx</code>, <code>vy</code>, <code>g</code>. The app's materials may carry extra keys (<code>grade</code>, <code>fy</code>); the engine ignores them.</td><td>MPa</td></tr>
+    <tr><td><code>nodes[]</code></td><td><code>x</code>, <code>z</code>: coordinates in the section plane; <code>free</code>: CUFSM's four dof flags (u, v, w, θ), 1 free, 0 fixed; <code>stress</code>: the reference stress at the node, positive in compression (CUFSM's convention).</td><td>mm, MPa</td></tr>
+    <tr><td><code>elems[]</code></td><td>Strips: <code>i</code>, <code>j</code> are node indices, <b>0-based</b> (node 1 in the app is 0 here); <code>t</code> thickness; <code>mat</code> a material <code>id</code>.</td><td>mm</td></tr>
+    <tr><td><code>springs[]</code></td><td>Rows of nine: <code>[node_i, node_j (-1 for ground), ku, kv, kw, kq, local (0/1), discrete (0/1), ys (0 to 1)]</code>, node indices 0-based.</td><td>N, mm</td></tr>
+    <tr><td><code>constraints[]</code></td><td>Rows of five: <code>[node_e, dof_e (1 to 4), coeff, node_k, dof_k]</code>, meaning u<sub>e</sub> = coeff × u<sub>k</sub>; node indices 0-based.</td><td></td></tr>
+    <tr><td><code>loads</code></td><td>The reference loads from the Loads panel; <code>restrained</code> is the restrained-bending option.</td><td>N, N·mm, N·mm²</td></tr>
+    <tr><td><code>fy</code></td><td>The yield stress from the Section or Loads panel.</td><td>MPa</td></tr>
+    <tr><td><code>analysis</code></td><td><code>solution</code> (<code>"signature"</code> or <code>"general"</code>), <code>bc</code>, <code>terms</code>, <code>neigs</code> (eigenvalues per length) and <code>lengths</code>.</td><td>mm</td></tr>
+  </tbody>
+</table></div>
+<p>A model must have at least one element and at most 5000 nodes. Every node needs finite <code>x</code> and
+<code>z</code>, every element a thickness above zero and a defined material, and every material finite
+<code>ex</code>, <code>ey</code>, <code>vx</code>, <code>vy</code> and <code>g</code>, with <code>ex</code>, <code>ey</code>
+and <code>g</code> above zero.</p>
+
+<h2 id="cap-getModel"><code>getModel()</code><a class="g-anchor" href="#cap-getModel" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> none. <b>Returns:</b> the <a href="#model">model shape</a>, with <code>"units": "N-mm"</code>.</p>
+<p>In the app: a copy of the model on screen, with the Loads panel's reference loads and fy, and the analysis settings.
+In a worked example: the example's <code>model</code> fixture, exactly as written (plus <code>units</code>). An example
+with no <code>model</code> gives <code>{"units": "N-mm"}</code> and nothing else, which is fine for a module that never
+reads it.</p>
+<pre><code class="language-python">m = json.loads(civilkit.getModel())
+n_nodes = len(m["nodes"])
+fy = m["fy"]                       # MPa
+t = m["elems"][0]["t"]             # mm</code></pre>
+
+<h2 id="cap-hasResults"><code>hasResults()</code><a class="g-anchor" href="#cap-hasResults" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> none. <b>Returns:</b> <code>True</code> when the app has a solved curve for the current model,
+<code>False</code> otherwise. Always <code>False</code> in a worked example and in the command line, which never
+solve the fixture.</p>
+
+<h2 id="cap-getResults"><code>getResults()</code><a class="g-anchor" href="#cap-getResults" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> none. <b>Returns:</b> the app's solved curve:</p>
+<pre><code>{
+  "curve": [[L, lf], …],
+  "minima": [{"length": 115.18, "lf": 0.2235, "kind": "L", "cls": [G, D, L, O] or null}, …],
+  "maxStress": 450
+}</code></pre>
+<ul>
+  <li><code>curve</code>: the length (mm) and the lowest load factor at it, in the app's order.</li>
+  <li><code>minima</code>: the minima the app marks, each with the family it labels it (<code>"G"</code>,
+    <code>"D"</code>, <code>"L"</code> or <code>"O"</code>) and, when the app has classified it, the cFSM shares in
+    per cent.</li>
+  <li><code>maxStress</code>: the largest absolute reference stress on the nodes (MPa), or 1 when there is none. A load
+    factor times <code>maxStress</code> is a buckling stress.</li>
+</ul>
+<p>With no solved curve (and always in a worked example) it returns
+<code>{"curve": [], "minima": [], "maxStress": null}</code>. The app's curve was solved under the app's loads, which need
+not be the loads your module wants; to be sure of the load case, solve your own with <a href="#cap-signature">signature</a>.</p>
+<pre><code class="language-python">if civilkit.hasResults():
+    r = json.loads(civilkit.getResults())
+    lowest = min(r["minima"], key=lambda mn: mn["lf"])
+    sigma_cr = lowest["lf"] * r["maxStress"]       # MPa</code></pre>
+<p>A module that reads results can only prove its no-results path in a worked example. That is by design: a badge earned
+by reproducing whatever model happened to be open would mean nothing.</p>
+
+<h2 id="cap-sectionProps"><code>sectionProps(json)</code><a class="g-anchor" href="#cap-sectionProps" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> <code>{ "model"?: model }</code>. <b>Returns:</b> the gross section properties of the strip model
+(CUFSM's <code>grosprop</code> and <code>cutwp</code>):</p>
+<div class="g-table"><table>
+  <thead><tr><th>Key</th><th>Meaning</th><th>Units</th></tr></thead>
+  <tbody>
+    <tr><td><code>A</code></td><td>Area</td><td>mm²</td></tr>
+    <tr><td><code>xcg</code>, <code>zcg</code></td><td>Centroid</td><td>mm</td></tr>
+    <tr><td><code>Ixx</code>, <code>Izz</code>, <code>Ixz</code></td><td>Second moments of area and product, about the centroid</td><td>mm⁴</td></tr>
+    <tr><td><code>thetap</code></td><td>Principal axis angle</td><td>degrees</td></tr>
+    <tr><td><code>I11</code>, <code>I22</code></td><td>Principal second moments</td><td>mm⁴</td></tr>
+    <tr><td><code>J</code></td><td>St Venant torsion constant</td><td>mm⁴</td></tr>
+    <tr><td><code>xs</code>, <code>zs</code></td><td>Shear centre</td><td>mm</td></tr>
+    <tr><td><code>Cw</code></td><td>Warping constant</td><td>mm⁶</td></tr>
+    <tr><td><code>B1</code>, <code>B2</code></td><td>The monosymmetry (Wagner) constants β₁, β₂</td><td>mm</td></tr>
+  </tbody>
+</table></div>
+<p>For the default lipped C: A = 525, Ixx = 1 813 408.75, J = 393.75, Cw = 2.6933 × 10⁹.</p>
+<pre><code class="language-python">p = json.loads(civilkit.sectionProps(json.dumps({})))
+rx = math.sqrt(p["Ixx"] / p["A"])          # mm</code></pre>
+
+<h2 id="cap-stress"><code>stress(json)</code><a class="g-anchor" href="#cap-stress" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> <code>{ "model"?, "P"?, "Mxx"?, "Mzz"?, "M11"?, "M22"?, "B"?, "restrained"? }</code>; the actions
+default to 0 and <code>restrained</code> to <code>false</code>. Units: P in N, moments in N·mm, B in N·mm².
+<b>Returns:</b> <code>{ "stress": [σ per node] }</code> in MPa, in node order, positive in compression: the stresses
+CUFSM's <i>Generate stress</i> writes on the nodes for those actions, added together. <code>restrained</code> is
+CUFSM's restrained-bending option, the Loads panel's <span class="ui">restrained bending about x-z</span>: as the app's
+note puts it, Mxx and Mzz act about the geometric axes, and with restrained bending about x-z as drawn; M11 and M22 act
+about the principal axes.</p>
+<p>The usual pattern: put the stresses on a copy of the model's nodes, and solve that copy.</p>
+<pre><code class="language-python">st = json.loads(civilkit.stress(json.dumps({"P": 100e3, "Mxx": 5e6})))["stress"]</code></pre>
+<p>On the default lipped C, P = 100 kN alone gives 100 000 / 525 = 190.48 MPa at every node; with Mxx = 5 kN·m added
+the node stresses run from −16.3 to 397.3 MPa.</p>
+
+<h2 id="cap-firstYield"><code>firstYield(json)</code><a class="g-anchor" href="#cap-firstYield" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> <code>{ "model"?, "fy": number, "restrained"?: false, "extremeFibre"?: true }</code>. <code>fy</code>
+(MPa) is required. <code>extremeFibre</code> is the app's extreme-fibre option: yield at the outermost fibre
+(<code>true</code>) or at the centreline nodes (<code>false</code>). <b>Returns:</b> the action that alone first reaches
+fy:</p>
+<pre><code>{ "Py": 236250, "Mxx": 10772725.2, "Mzz": 4232628.8, "M11": 10772725.2, "M22": 4232628.8, "B": 216189730.5 }</code></pre>
+<p>Py in N, the moments in N·mm, B in N·mm² (the numbers are the default lipped C at fy = 450). Py = A fy is the squash
+load. Refused with <code>fy must be a positive finite number</code> when fy is missing or not positive.</p>
+<pre><code class="language-python">y = json.loads(civilkit.firstYield(json.dumps({"fy": 450})))
+Py, My = y["Py"], y["Mxx"]       # N, N·mm</code></pre>
+
+<h2 id="cap-signature"><code>signature(json)</code><a class="g-anchor" href="#cap-signature" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b></p>
+<div class="g-table"><table>
+  <thead><tr><th>Key</th><th>Default</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>model</code></td><td>the current model</td><td>Solved with its own node stresses as the reference stress.</td></tr>
+    <tr><td><code>lengths</code></td><td><b>required</b></td><td>A list of positive lengths (mm): half-wavelengths for S-S, physical member lengths for the other end conditions. Use the model's <code>analysis.lengths</code>, or your own.</td></tr>
+    <tr><td><code>bc</code></td><td><code>"S-S"</code></td><td>End conditions: <code>"S-S"</code>, <code>"C-C"</code>, <code>"S-C"</code>, <code>"C-F"</code>, <code>"C-G"</code> (<code>"F-C"</code> and <code>"G-C"</code> are the same as <code>"C-F"</code> and <code>"C-G"</code>). Case matters.</td></tr>
+    <tr><td><code>terms</code></td><td><code>1</code></td><td>The number of longitudinal terms, as the app's <span class="ui">Longitudinal terms</span>. One is right for S-S; the other end conditions need more.</td></tr>
+    <tr><td><code>cfsm</code></td><td>none</td><td>Constrained curves to solve as well: any of <code>"G"</code>, <code>"D"</code>, <code>"L"</code>, <code>"O"</code>.</td></tr>
+  </tbody>
+</table></div>
+<p><b>Returns:</b></p>
+<pre><code>{
+  "curve": [[L, lf], …],
+  "constrained": {"L": [lf, …], "D": [lf, …]},
+  "minima": [{"index": 4, "length": 111.2, "lf": 100.81}, …]
+}</code></pre>
+<ul>
+  <li><code>curve</code>: each length with its lowest load factor, in the order of <code>lengths</code>.</li>
+  <li><code>constrained</code>: one list per requested cFSM space, aligned with <code>curve</code>. Empty
+    (<code>{}</code>) when none was asked for.</li>
+  <li><code>minima</code>: found by the same function the app uses for its own chart, so a module's minima and the
+    drawn curve's can never disagree. Interior minima, plus the last point when the curve is still falling there
+    (global governs at long lengths); for a curve with no minimum at all, its lowest point. <code>index</code> points
+    into <code>curve</code>. Minima are not classified: ask <a href="#cap-modes">modes</a> at their length.</li>
+</ul>
+<p>A load factor multiplies the reference stresses. With the stress at every node set to 1 MPa, it is the buckling
+stress in MPa; with the stresses of P = Py (from <code>stress</code>), it is Pcr / Py.</p>
+<pre><code class="language-python">s = json.loads(civilkit.signature(json.dumps({
+    "lengths": [20 * 1.1 ** k for k in range(60)],
+    "cfsm": ["L", "D"]})))
+first = s["minima"][0]
+local_only = s["constrained"]["L"][first["index"]]</code></pre>
+<p>Refused with <code>a length is not a positive finite number</code> for a zero, negative or missing entry,
+<code>unknown boundary condition "…"</code> for another end condition, and
+<code>undefined is not iterable …</code> when <code>lengths</code> is missing altogether.</p>
+
+<h2 id="cap-modes"><code>modes(json)</code><a class="g-anchor" href="#cap-modes" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> <code>{ "model"?, "length": number, "bc"?: "S-S", "terms"?: 1, "n"?: 5, "dofs"?: false }</code>.
+<code>length</code> (mm) is required; <code>n</code> is how many modes to solve. <b>Returns:</b></p>
+<pre><code>{ "modes": [ {"lf": 100.57, "cls": [0.35, 0.43, 99.06, 0.16], "kind": "L"}, … ] }</code></pre>
+<ul>
+  <li><code>lf</code>: the load factor, lowest first.</li>
+  <li><code>cls</code>: the cFSM modal classification, the shares of G, D, L and O in per cent (they add to 100).</li>
+  <li><code>kind</code>: the letter with the largest share.</li>
+  <li><code>dofs</code> (only with <code>"dofs": true</code>): the mode shape, normalised so its largest in-plane entry is
+    1. For each longitudinal term, 4 × (number of nodes) values in CUFSM's order: u₁ v₁ … uₙ vₙ (x and longitudinal),
+    then w₁ θ₁ … wₙ θₙ (z and rotation).</li>
+</ul>
+<pre><code class="language-python">md = json.loads(civilkit.modes(json.dumps({"length": 115.18, "n": 3})))["modes"]
+kinds = [x["kind"] for x in md]</code></pre>
+<p>Refused with <code>a length is not a positive finite number</code> when <code>length</code> is missing or not
+positive.</p>
+
+<h2 id="cap-proposeModel"><code>proposeModel(json)</code><a class="g-anchor" href="#cap-proposeModel" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> a model in the <a href="#model">model shape</a>. <code>springs</code> and <code>constraints</code>
+default to empty; <code>loads</code>, <code>fy</code> and <code>analysis</code> are optional and, when present, are
+applied with the section if the user accepts it. <b>Returns:</b> <code>{"accepted": false, "pending": true, "error": null}</code>
+for a valid model, or <code>{"accepted": false, "pending": false, "error": "the model has no elements"}</code> for an
+invalid one.</p>
+<p>The host validates the model, and the app shows <code>‹module› proposes a section: N nodes, M elements.</code> with
+<span class="ui">Preview</span>, <span class="ui">Use it</span> and <span class="ui">Dismiss</span> (see
+<a href="using.html#proposals">section proposals</a>). Nothing is applied until the user presses
+<span class="ui">Use it</span>, so <code>accepted</code> is always <code>false</code>: the module cannot tell what the
+user chose. Each call makes one proposal; an invalid one is reported to the user as
+<code>‹module› proposed an invalid section: ‹reason›</code>, and does not stop the run. In a worked example and in the
+command line, proposals are recorded in the report and never applied.</p>
+<pre><code class="language-python">r = json.loads(civilkit.proposeModel(json.dumps(model)))</code></pre>
+<p>Node <code>free</code> flags default to <code>[1, 1, 1, 1]</code> and <code>stress</code> to 1 when the app takes the
+section. The <a href="reference-modules.html#section-rounded-cz">Rounded C / Z section</a> module is the worked
+pattern.</p>
+
+<h2 id="cap-log"><code>log(msg)</code><a class="g-anchor" href="#cap-log" aria-label="Link to this section">#</a></h2>
+<p><b>Argument:</b> a string. <b>Returns:</b> nothing. Never needs declaring.</p>
+<pre><code class="language-python">civilkit.log("lengths: %d" % len(ls))</code></pre>
+<p>The <a href="cli.html#test">command line</a> prints each message as a <code>log:</code> line, and lists it in the
+JSON report's <code>run.logs</code>; <code>print()</code> output appears there under <code>stdout:</code>. In the app,
+log messages and printed output are not shown in this version: put what the user should see in result rows or calc
+lines.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="tutorial.html"><small>Previous</small>‹ Tutorial: your first module</a>
+    <a class="next" href="ui.html"><small>Next</small>UI reference ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

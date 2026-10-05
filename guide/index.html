@@ -1,0 +1,278 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>CivilKit Buckling guide</title>
+<meta name="description" content="The guide to CivilKit Buckling's two ways of going past its buttons: extensions, small apps in Python shared as .ckext files, and the Python console, which runs your own cufsm-rs-py scripts in the page. Both run on the same buckling engine.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html" aria-current="page"><span class="g-num">1</span> Overview</a>
+      <ul>
+        <li><a href="#which">Which one?</a></li>
+        <li><a href="#extensions">Extensions</a></li>
+        <li><a href="#python">The Python console</a></li>
+        <li><a href="#what">What a module is for</a></li>
+        <li><a href="#bundle">The bundle</a></li>
+        <li><a href="#rule">The rule: numbers come from capabilities</a></li>
+        <li><a href="#studio">The same format as CivilKit Studio</a></li>
+        <li><a href="#engine">The engine</a></li>
+        <li><a href="#map">This guide</a></li>
+        <li><a href="#open-source">Open source</a></li>
+      </ul></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">CivilKit Buckling guide</h1>
+<p class="g-lede">Two ways to go past the app's buttons, both in Python and both on the same buckling engine.
+<b>Extensions</b> are small apps that run inside CivilKit Buckling, with a form, results and charts, shared as
+<code>.ckext</code> files. <b>The Python console</b> runs your own scripts in the page, written for the
+<code>cufsm-rs-py</code> package.</p>
+
+<h2 id="which">Which one?<a class="g-anchor" href="#which" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th></th><th>An extension</th><th>A console script</th></tr></thead>
+  <tbody>
+    <tr><td>For</td><td>a tool other people use: a form, a check, results and calc lines</td><td>your own work: loops of analyses, studies, searches, tables</td></tr>
+    <tr><td>Written as</td><td><code>build_ui</code> and <code>check</code>, calling the engine through capabilities</td><td>a plain script: <code>import cufsm_rs</code>, the API of <code>pip install cufsm-rs-py</code></td></tr>
+    <tr><td>Python</td><td>MicroPython, in a sandbox, 20 seconds a call</td><td>MicroPython, or full Python with numpy, scipy and matplotlib when you agree to its download</td></tr>
+    <tr><td>Shared as</td><td>a <code>.ckext</code> file or the store, with a Verified badge from worked examples</td><td>a <code>.py</code> file, which also runs on your own machine</td></tr>
+    <tr><td>Start at</td><td><a href="using.html">Using extensions</a>, <a href="tutorial.html">the tutorial</a></td><td><a href="console.html">The Python console</a></td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="extensions">Extensions<a class="g-anchor" href="#extensions" aria-label="Link to this section">#</a></h2>
+<p>An extension is a small app that runs inside CivilKit Buckling: a form, a check, results, calc lines and charts,
+written in Python. It is packed as a <code>.ckext</code> file. The engineering numbers come from the buckling engine;
+the module decides what to ask for, in what order, and which clause equations to apply.</p>
+<ul class="g-cards">
+  <li><a href="using.html"><b>Use an extension</b><span>Install from the store or a file, run it, accept a section it proposes.</span></a></li>
+  <li><a href="tutorial.html"><b>Write your first module</b><span>Step by step in the module builder: yield, local buckling, a worked example, Verified.</span></a></li>
+  <li><a href="capabilities.html"><b>Capability reference</b><span>Every call a module can make to the engine, with arguments, returns and units.</span></a></li>
+  <li><a href="ui.html"><b>UI reference</b><span>Every form, result, chart and drawing node the app renders.</span></a></li>
+</ul>
+
+<h2 id="python">The Python console<a class="g-anchor" href="#python" aria-label="Link to this section">#</a></h2>
+<p>The console (<span class="ui">More</span> › <span class="ui">Python</span> on a phone, the <span class="ui">Python</span>
+tab on a desktop) runs cufsm-rs-py scripts in the page: hundreds of analyses in a loop, each one feeding a design
+check, with printed tables and figures. A script that runs here runs on your own machine after
+<code>pip install cufsm-rs-py</code>, with the same numbers.</p>
+<ul class="g-cards">
+  <li><a href="console.html"><b>The Python console</b><span>Where it is, Run and Stop, examples, output and figures, drafts.</span></a></li>
+  <li><a href="runtimes.html"><b>MicroPython and full Python</b><span>How the console picks a runtime, what it downloads, and what runs where.</span></a></li>
+  <li><a href="python-api.html"><b>Python API reference</b><span>Every name in <code>cufsm_rs</code>, with arguments, defaults, units and returns.</span></a></li>
+  <li><a href="examples.html"><b>Python examples</b><span>Design searches, studies and the README quickstart, each a link that opens it.</span></a></li>
+  <li><a href="engine-api.html"><b>Engine API</b><span>The Rust engine's C / wasm interface, for calling it from JavaScript or C.</span></a></li>
+</ul>
+<p>The rest of this page introduces extensions.</p>
+
+<h2 id="what">What a module is for<a class="g-anchor" href="#what" aria-label="Link to this section">#</a></h2>
+<p>The app solves the elastic buckling problem: the signature curve, its minima, the modes and first yield.
+A module turns those numbers into something you would otherwise work out on paper or in a spreadsheet:</p>
+<ul>
+  <li><b>A design check:</b> for example the Direct Strength Method column strength from the signature curve
+    (the <a href="reference-modules.html#dsm-compression">DSM compression</a> module).</li>
+  <li><b>A section generator:</b> a C or Z with rounded corners, meshed the way CUFSM's template does, offered to
+    the analysis (<a href="reference-modules.html#section-rounded-cz">Rounded C / Z section</a>).</li>
+  <li><b>A study:</b> many engine solves in a loop, with charts and a table
+    (<a href="reference-modules.html#thickness-study">Thickness study</a>).</li>
+  <li><b>Your office's procedure:</b> the checks your firm always makes, with its own factors, written once and
+    shared as a file.</li>
+</ul>
+
+<h2 id="bundle">The bundle<a class="g-anchor" href="#bundle" aria-label="Link to this section">#</a></h2>
+<p>A <code>.ckext</code> is a zip file with three entries:</p>
+<pre><code>manifest.json                 what the module is, where it plugs in, which capabilities it calls
+main.py                       MicroPython: build_ui() draws the form, check() computes
+tests/worked-examples.json    cited examples; when every one reproduces its numbers the module is Verified</code></pre>
+<p>Keep the three in a folder and let the command line pack them (<code>node tools/ckext.mjs pack my-module</code>,
+see <a href="cli.html#pack">the ckext command line</a>), or write them in the app's
+<a href="tutorial.html">module builder</a>, which exports the zip for you. Zipping by hand also works, from inside the
+folder so the paths are relative: <code>zip -r my-module.ckext manifest.json main.py tests</code>.</p>
+
+<h3 id="manifest">manifest.json<a class="g-anchor" href="#manifest" aria-label="Link to this section">#</a></h3>
+<pre><code>{
+  "id": "yourname.squash-load",
+  "name": "Squash load",
+  "version": "1.0.0",
+  "civilkitApi": "^1.0",
+  "description": "The section's squash load Py = A fy, from the engine's first yield.",
+  "license": "MIT",
+  "contributes": [{ "point": "buckling.tool", "id": "squash-load" }],
+  "capabilities": ["firstYield"]
+}</code></pre>
+<div class="g-table"><table>
+  <thead><tr><th>Field</th><th>Required</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>The module's identity, reverse-domain style (<code>yourname.squash-load</code>). Installing a bundle with an id that is already installed replaces it.</td></tr>
+    <tr><td><code>name</code></td><td>yes</td><td>Shown in the Extensions list and the module's title bar.</td></tr>
+    <tr><td><code>version</code></td><td>yes</td><td>Semantic version, <code>1.0.0</code>. The store offers <span class="ui">Update</span> when its version differs from yours.</td></tr>
+    <tr><td><code>civilkitApi</code></td><td>yes</td><td><code>"^1.0"</code>: the host API this module was written for.</td></tr>
+    <tr><td><code>contributes</code></td><td>yes</td><td><code>[{ "point": "buckling.tool", "id": "…" }]</code>. <code>buckling.tool</code> is the one contribution point Buckling has: a tool that opens from Extensions.</td></tr>
+    <tr><td><code>capabilities</code></td><td>no, but needed</td><td>The engine calls the module makes. A call to anything not listed stops the module with <code>Capability 'x' not declared in the module manifest</code>. See <a href="capabilities.html#declaring">declaring capabilities</a>.</td></tr>
+    <tr><td><code>description</code>, <code>license</code>, <code>author</code>, <code>homepage</code></td><td>no</td><td>Shown to the user. They confer no trust.</td></tr>
+    <tr><td><code>tests</code></td><td>no</td><td>The worked examples' path inside the bundle, if not <code>tests/worked-examples.json</code>.</td></tr>
+  </tbody>
+</table></div>
+
+<h3 id="main-py">main.py<a class="g-anchor" href="#main-py" aria-label="Link to this section">#</a></h3>
+<p>MicroPython, not CPython. <code>json</code> and <code>math</code> are there; most of the standard library is not.
+The host calls two functions:</p>
+<ul>
+  <li><code>build_ui(inputs, result, calcLines)</code> returns the form as a tree of plain dicts (the
+    <a href="ui.html">UI reference</a> lists every node). It is called when the module opens, with <code>{}</code>,
+    <code>[]</code>, <code>[]</code>, and after every check with the inputs and what <code>check</code> returned.</li>
+  <li><code>check(inputs)</code> computes, and returns <code>{"result": [rows], "calcLines": [lines]}</code>. It runs
+    when the user presses a button whose <code>action</code> is <code>"run-check"</code>, or changes a field.</li>
+</ul>
+<p>The whole of a working module:</p>
+<pre><code class="language-python">import json, civilkit
+
+
+def build_ui(inputs, result, calcLines):
+    return {"type": "panel", "title": "Squash load", "children": [
+        {"type": "field", "id": "fy", "label": "fy (MPa)", "inputType": "number",
+         "default": inputs.get("fy", 450)},
+        {"type": "button", "id": "run", "label": "Run", "action": "run-check"},
+        {"type": "result", "items": result},
+    ]}
+
+
+def check(inputs):
+    fy = float(inputs.get("fy") or 450)
+    y = json.loads(civilkit.firstYield(json.dumps({"fy": fy})))
+    return {
+        "result": [{"label": "Py", "value": y["Py"] / 1000, "unit": "kN"}],
+        "calcLines": [{"label": "Squash load", "eq": "Py = A fy = %.5g kN" % (y["Py"] / 1000)}],
+    }</code></pre>
+<p><code>civilkit</code> is the host module. Each capability takes and returns a JSON string, hence the
+<code>json.dumps</code> and <code>json.loads</code>. <a href="ui.html#calls">How build_ui and check are called</a> has the details.</p>
+
+<h3 id="examples">tests/worked-examples.json<a class="g-anchor" href="#examples" aria-label="Link to this section">#</a></h3>
+<p>A list of examples, each a fixture model, the inputs, the numbers you expect and where they come from. The module is
+<b>Verified</b> when every example reproduces its expected numbers within 0.1 %; otherwise it is <b>Community</b>.
+<a href="worked-examples.html">Worked examples and the badge</a> covers the format and the rules.</p>
+
+<h2 id="rule">The rule: numbers come from capabilities<a class="g-anchor" href="#rule" aria-label="Link to this section">#</a></h2>
+<div class="g-rule">
+<p><b>Engineering numbers come from the engine.</b> Section properties, reference stresses, first yield, buckling load
+factors and their minima come from capabilities. A module's own code is orchestration plus the clause equations it
+cites, such as the DSM strength curves. Its worked examples must reproduce cited numbers: a hand calculation or a
+published example, never the engine's own output pasted back in.</p>
+</div>
+<p>This is what makes a Verified badge mean something. The engine is tested against CUFSM to 1e-12 by its own suite;
+a module that re-derives a property in Python has a second, untested implementation. Write the equations a standard
+gives you, and ask the engine for everything it can tell you.</p>
+
+<h2 id="studio">The same format as CivilKit Studio<a class="g-anchor" href="#studio" aria-label="Link to this section">#</a></h2>
+<p>A Buckling module is a normal <code>.ckext</code>, the same format CivilKit Studio's extensions use. Shared between the
+two apps:</p>
+<ul>
+  <li>the bundle (<code>manifest.json</code>, <code>main.py</code>, <code>tests/worked-examples.json</code>);</li>
+  <li>the <code>build_ui</code> / <code>check</code> contract and the JSON UI tree, drawn by the same renderer;</li>
+  <li>the worked-example format, the 0.1 % matching rule and the Verified / Community badge;</li>
+  <li>the headless test report's shape (<code>badge</code>, <code>examples</code>, <code>form</code>, <code>run</code>,
+    <code>capabilities</code>).</li>
+</ul>
+<p>What differs is declared, not implied: Buckling's contribution point is <code>buckling.tool</code> (Studio's is
+<code>design-check</code>), and its <a href="capabilities.html">capabilities</a> are about the section and its buckling,
+in N, mm and MPa. Each app refuses the other's modules at install, naming the right app:
+<code>This module is for CivilKit Studio: its contribution points (design-check) are not among this app's (buckling.tool)</code>.</p>
+
+<h2 id="engine">The engine<a class="g-anchor" href="#engine" aria-label="Link to this section">#</a></h2>
+<p>Every number a capability returns comes from <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust
+port of CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (with Sándor Ádány for constrained FSM,
+cFSM), compiled to WebAssembly. It runs in your browser, in the same sandboxed worker as the module, so capability calls
+are synchronous and there is no server. Units are N, mm and MPa throughout (N·mm for moments, N·mm² for the bimoment).</p>
+
+<h2 id="map">This guide<a class="g-anchor" href="#map" aria-label="Link to this section">#</a></h2>
+<p>Extensions:</p>
+<ol>
+  <li><a href="using.html">Using extensions</a>: install, badges, run, View code, proposals, the sandbox.</li>
+  <li><a href="tutorial.html">Tutorial</a>: your first module in the builder, from the starter to Verified and exported.</li>
+  <li><a href="capabilities.html">Capability reference</a>: every call, its argument, return, units and errors.</li>
+  <li><a href="ui.html">UI reference</a>: every node type and property the app renders.</li>
+  <li><a href="worked-examples.html">Worked examples and the badge</a>: the format, the tolerance, sources.</li>
+  <li><a href="cli.html">The ckext command line</a>: pack and test without a browser; building the store.</li>
+  <li><a href="reference-modules.html">Reference modules</a>: the three shipped modules, annotated.</li>
+</ol>
+<p>Python:</p>
+<ol>
+  <li><a href="console.html">The Python console</a>: where it is, the toolbar, <code>?py=</code> links, output, drafts.</li>
+  <li><a href="runtimes.html">MicroPython and full Python</a>: the two runtimes, the download prompt, what runs where.</li>
+  <li><a href="python-api.html">Python API reference</a>: <code>cufsm_rs</code> and <code>cufsm_rs.plot</code>, name by name.</li>
+  <li><a href="examples.html">Python examples</a>: each shipped script, its runtime and a link.</li>
+  <li><a href="engine-api.html">Engine API (Rust / wasm)</a>: the C interface every part of the app is built on.</li>
+</ol>
+<p>And <a href="faq.html">Troubleshooting and FAQ</a>, for both: error messages, limits and questions.</p>
+
+<h2 id="open-source">Open source<a class="g-anchor" href="#open-source" aria-label="Link to this section">#</a></h2>
+<p>CivilKit Buckling is open source, part of <a href="https://mageengineering.com.au">CivilKit</a>, open structural
+engineering tools by Mage Engineering. The code, this guide and the reference modules are on GitHub at
+<a href="https://github.com/mageaustralia/civilkit-buckling">mageaustralia/civilkit-buckling</a>.</p>
+<ul>
+  <li><b>Licence:</b> the <a href="https://github.com/mageaustralia/civilkit-buckling/blob/main/LICENSE">Apache License 2.0</a>.
+    You may use, change, fork and host it. The third-party parts (cufsm-rs and CUFSM, MicroPython, fflate, and Pyodide when
+    you download it) keep their own licences, listed in
+    <a href="https://github.com/mageaustralia/civilkit-buckling/blob/main/THIRD_PARTY_NOTICES">THIRD_PARTY_NOTICES</a>.</li>
+  <li><b>The name:</b> "CivilKit", "CivilKit Buckling" and the CivilKit logo are not part of the licence. A changed copy
+    goes by its own name and may say it is based on CivilKit Buckling; the
+    <a href="https://github.com/mageaustralia/civilkit-buckling/blob/main/TRADEMARKS.md">trademark note</a> says more.</li>
+  <li><b>Contributing:</b> issues and pull requests are welcome; the README's
+    <a href="https://github.com/mageaustralia/civilkit-buckling#contributing">Contributing</a> section says how. To add a tool
+    without touching the app, write an extension: start with <a href="tutorial.html">the tutorial</a>.</li>
+</ul>
+<p>The engine is <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a> (Rust) and, for your own machine,
+<a href="https://github.com/mageaustralia/cufsm-rs-py">cufsm-rs-py</a> (<code>pip install cufsm-rs-py</code>). Both are
+ports of <a href="https://www.ce.jhu.edu/cufsm/">CUFSM</a>, by Benjamin W. Schafer and co-workers at Johns Hopkins
+University, to whom this project owes its method.</p>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="next" href="using.html"><small>Next</small>Using extensions ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

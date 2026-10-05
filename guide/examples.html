@@ -1,0 +1,202 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Python examples · CivilKit Buckling guide</title>
+<meta name="description" content="The example scripts the Python console ships: what each one shows, which runtime it needs, and a link that opens it in the console.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html" aria-current="page"><span class="g-num">12</span> Python examples</a>
+      <ul>
+        <li><a href="#list">The examples</a></li>
+        <li><a href="#unverified">What is not verified</a></li>
+        <li><a href="#lightest">Lightest section</a></li>
+        <li><a href="#catalogue">Catalogue check</a></li>
+        <li><a href="#lip-study">DSM lip study</a></li>
+        <li><a href="#end-conditions">End conditions</a></li>
+        <li><a href="#distortional">Distortional mode</a></li>
+        <li><a href="#readme">README quickstart</a></li>
+        <li><a href="#lip-plots">Lip study, plotted</a></li>
+        <li><a href="#lightest-numpy">Lightest section, numpy</a></li>
+        <li><a href="#dsm">dsm.py</a></li>
+      </ul></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Python examples</h1>
+<p class="g-lede">The scripts in the console's <span class="ui">Examples…</span> menu. Each link below opens the app
+with that script in the console's editor; press <span class="ui">Run</span>. Every number they print comes from the
+engine or from a design clause the script cites.</p>
+
+<h2 id="list">The examples<a class="g-anchor" href="#list" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Example</th><th>Runtime</th><th>Draws</th><th>Open it</th></tr></thead>
+  <tbody>
+    <tr><td><a href="#lightest">Search: the lightest lipped C for a load</a></td><td>MicroPython</td><td>section, signature curve</td><td><a href="../?py=lightest_section.py">?py=lightest_section.py</a></td></tr>
+    <tr><td><a href="#catalogue">Catalogue check: 12 sections against a load</a></td><td>MicroPython</td><td>signature curve</td><td><a href="../?py=catalogue_check.py">?py=catalogue_check.py</a></td></tr>
+    <tr><td><a href="#lip-study">DSM design study: lip depth</a></td><td>MicroPython</td><td>signature curve</td><td><a href="../?py=dsm_lip_study.py">?py=dsm_lip_study.py</a></td></tr>
+    <tr><td><a href="#end-conditions">End conditions: S-S, C-C, S-C, C-F, C-G</a></td><td>MicroPython</td><td>two mode shapes</td><td><a href="../?py=end_conditions.py">?py=end_conditions.py</a></td></tr>
+    <tr><td><a href="#distortional">Distortional mode and sheathing springs</a></td><td>MicroPython</td><td>section, curves, mode</td><td><a href="../?py=distortional_mode.py">?py=distortional_mode.py</a></td></tr>
+    <tr><td><a href="#readme">cufsm-rs-py README quickstart, verbatim</a></td><td>full Python: numpy, matplotlib (25.6 MB the first time)</td><td>section, signature, mode (matplotlib)</td><td><a href="../?py=full/readme_quickstart.py">?py=full/readme_quickstart.py</a></td></tr>
+    <tr><td><a href="#lip-plots">Lip study, plotted</a></td><td>full Python: numpy, matplotlib (25.6 MB)</td><td>two matplotlib charts</td><td><a href="../?py=full/lip_study_plots.py">?py=full/lip_study_plots.py</a></td></tr>
+    <tr><td><a href="#lightest-numpy">Lightest section: numpy design space, scipy</a></td><td>full Python: numpy, scipy, matplotlib (38.9 MB)</td><td>a matplotlib scatter</td><td><a href="../?py=full/lightest_numpy.py">?py=full/lightest_numpy.py</a></td></tr>
+  </tbody>
+</table></div>
+<p>The download sizes are for a device with no full Python yet (<a href="runtimes.html#consent">the download prompt</a>).
+Every MicroPython example also runs on full Python and, with <code>pip install "cufsm-rs-py[plot]"</code> and
+<a href="#dsm"><code>dsm.py</code></a> beside it, on your own machine. The parity suite runs each example on
+MicroPython, full Python and CPython with pip, and compares the numbers.</p>
+
+<h2 id="unverified">What is not verified<a class="g-anchor" href="#unverified" aria-label="Link to this section">#</a></h2>
+<div class="g-warn">
+<p>The design examples apply the Direct Strength Method (AISI S100-16 Chapter E) through
+<a href="#dsm"><code>dsm.py</code></a>. Two parts of it are marked in the scripts as not checked against the standard,
+and the scripts print the notes:</p>
+<ul>
+  <li><b>The DSM pre-qualified limits</b> (<code>dsm.prequalified</code>), which decide where φc = 0.85 applies. The
+    lightest-section searches and the catalogue check end with: <i>Note: the DSM pre-qualified limits used here (AISI
+    S100-16 Table B4.1-1) are UNVERIFIED: written from recollection, not checked against the standard.</i></li>
+  <li><b>The D-only Pcrd</b> (<code>dsm.d_only</code>). Where the signature curve has no distinct distortional minimum,
+    Pcrd comes from a constrained cFSM analysis restricted to the distortional space
+    (<code>strip(..., spaces="D")</code>, at the same half-wavelengths, its lowest minimum). The script says AISI's DSM
+    allows this <i>(S100-16 commentary on Appendix 2, as recalled: the clause reference is not checked against the
+    text)</i>, and the plotted lip study prints <i>Pcrd marked D-only comes from a constrained cFSM run (dsm.d_only):
+    the DSM commentary reference for that is recalled, UNVERIFIED against the text.</i> Results that use it are marked
+    <code>cFSM D-only</code> or <code>(Pcrd D-only)</code>.</li>
+</ul>
+<p>Check both before relying on a pass. The examples show what a script can do; they are not design software.</p>
+</div>
+
+<h2 id="lightest">Search: the lightest lipped C for a load<a class="g-anchor" href="#lightest" aria-label="Link to this section">#</a></h2>
+<p><code>lightest_section.py</code> · MicroPython · <a href="../?py=lightest_section.py">open in the console</a></p>
+<p>A continuously braced column (Le = 0, so no global buckling) must carry φc Pn ≥ 80 kN at fy = 450 MPa. The script
+tries lipped Cs over sets of depth (100 to 250 mm), flange (50 to 90 mm), lip (0.15 to 0.40 of the flange) and
+thickness (1.0 to 2.4 mm), keeps those inside the DSM pre-qualified limits, and for each runs the signature curve, picks
+the local and distortional minima with cFSM and works the DSM strength. It goes thickness by thickness, lightest first,
+and prints the lightest pass at each, then the winner, checked again on a finer grid, its section and its classified
+signature curve. What a script does that the GUI cannot: a hundred and more analyses in a loop, each feeding a design
+check. Change <code>TARGET</code>, <code>FY</code> or the sets and run it again.</p>
+
+<h2 id="catalogue">Catalogue check: 12 sections against a load<a class="g-anchor" href="#catalogue" aria-label="Link to this section">#</a></h2>
+<p><code>catalogue_check.py</code> · MicroPython · <a href="../?py=catalogue_check.py">open in the console</a></p>
+<p>Twelve lipped Cs, each given by its depth, flange, lip and thickness, checked as continuously braced columns against
+N* = 60 kN. It prints a pass/fail table sorted by mass, with Pnl, Pnd, φc Pn, the utilisation and the governing mode,
+and draws the classified signature curve of the lightest that passes. The sections are generic sizes with names in
+the common "depth, thickness" style, not any manufacturer's catalogue: put your supplier's dimensions in
+<code>SECTIONS</code> to check theirs.</p>
+
+<h2 id="lip-study">DSM design study: lip depth<a class="g-anchor" href="#lip-study" aria-label="Link to this section">#</a></h2>
+<p><code>dsm_lip_study.py</code> · MicroPython · <a href="../?py=dsm_lip_study.py">open in the console</a></p>
+<p>A 150 × 64 × 1.5 mm lipped C column, continuously braced, with the lip swept from 8 to 24 mm. For each lip: the
+signature curve, its local and distortional minima (cFSM), and the DSM strengths (§E2 Pne = Py when braced, §E3 local,
+§E4 distortional). It prints the elastic buckling table and the strength table, reports the lip with the highest
+strength per unit of steel, and draws that lip's signature curve with the minima classified.</p>
+
+<h2 id="end-conditions">End conditions: S-S, C-C, S-C, C-F, C-G<a class="g-anchor" href="#end-conditions" aria-label="Link to this section">#</a></h2>
+<p><code>end_conditions.py</code> · MicroPython · <a href="../?py=end_conditions.py">open in the console</a></p>
+<p>The signature curve assumes simply supported ends and one half-wave; real members are fixed, free or guided at their
+ends. A 150 × 64 × 18 × 2.4 mm lipped C at 1000, 2000 and 3000 mm is solved with CUFSM's general end conditions
+(pinned-pinned, fixed-fixed, pinned-fixed, fixed-free, fixed-guided) with enough longitudinal terms to reach local
+buckling's short half-waves. For each it prints Pcr, what cFSM says the mode is and which term carries most of it, and
+it ends with the mode shapes of the weakest and strongest ends at the longest length. The heaviest example: 15 coupled
+solves of up to 30 terms each, which the script puts at about 10 to 25 seconds in the page.</p>
+
+<h2 id="distortional">Distortional mode and sheathing springs<a class="g-anchor" href="#distortional" aria-label="Link to this section">#</a></h2>
+<p><code>distortional_mode.py</code> · MicroPython · <a href="../?py=distortional_mode.py">open in the console</a></p>
+<p>Part 1 opens up the distortional mode of a 150 × 64 × 15 × 1.5 mm lipped C with
+<code>mode_shape(...).at()</code>: which nodes move most, and how the flange and lip rotate about the web-flange corner.
+Part 2 adds a continuous rotational spring at both flange-web corners, as sheathing gives, and sweeps its stiffness
+until the distortional minimum disappears from the curve. It draws the section, the curve, the mode, and the curve
+once the spring has removed the distortional minimum.</p>
+
+<h2 id="readme">cufsm-rs-py README quickstart, verbatim<a class="g-anchor" href="#readme" aria-label="Link to this section">#</a></h2>
+<p><code>full/readme_quickstart.py</code> · full Python (numpy, matplotlib) · <a href="../?py=full/readme_quickstart.py">open in the console</a></p>
+<p>The package README's quickstart as published, from <code>import numpy as np</code> to <code>plot_mode</code>:
+CUFSM's tutorial C in inches and ksi, its properties, first yield, signature curve, minima and classification,
+<code>strip</code> with several modes, a pure distortional run, general end conditions and <code>lipped_c</code>.
+After it, a few <code>print</code> lines show the values the README's comments describe, and <code>plt.show()</code>
+puts the three matplotlib figures in the output. The same script, with the same numbers, as on your own machine.</p>
+
+<h2 id="lip-plots">Lip study, plotted<a class="g-anchor" href="#lip-plots" aria-label="Link to this section">#</a></h2>
+<p><code>full/lip_study_plots.py</code> · full Python (numpy, matplotlib) · <a href="../?py=full/lip_study_plots.py">open in the console</a></p>
+<p>The DSM lip study with charts of its own: all nine lips' signature curves on one log-x axes, each lip's local and
+distortional minima marked; then Pn/A and Pn against lip depth, the governing mode marked, and the best lip by the lip
+study's rule (the shortest within 0.5 % of the top Pn/A).</p>
+
+<h2 id="lightest-numpy">Lightest section: numpy design space, scipy<a class="g-anchor" href="#lightest-numpy" aria-label="Link to this section">#</a></h2>
+<p><code>full/lightest_numpy.py</code> · full Python (numpy, scipy, matplotlib) · <a href="../?py=full/lightest_numpy.py">open in the console</a></p>
+<p>The lightest-section search with what full Python adds: numpy builds the whole design space as arrays and applies
+the pre-qualified limits as masks; every analysed section's mass and φc Pn go on a scatter chart, passes against
+fails, with the target and the winner marked; and <code>scipy.optimize.brentq</code> finds the thickness at which the
+winner's shape exactly carries the target, each trial an engine run and a DSM check, to show how much of the chosen
+gauge is margin.</p>
+
+<h2 id="dsm"><code>dsm.py</code>: the shared DSM module<a class="g-anchor" href="#dsm" aria-label="Link to this section">#</a></h2>
+<p>Not a script on its own: the lipped C builder and the DSM column strength that the design examples import
+(<code>import dsm</code>). The console installs it, so your own scripts can import it too; on your own machine keep it
+next to the script. Its DSM equations and the rule that picks the local and distortional minima are ported clause by
+clause from the <a href="reference-modules.html#dsm-compression">DSM compression module</a>; every buckling load
+comes from the engine. Its names:</p>
+<div class="g-table"><table>
+  <thead><tr><th>Name</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>lipped_c(D, B, d, t, n_web=8, n_flange=4, n_lip=2)</code></td><td>A lipped C on its centreline with square corners, from out-to-out D, B, d and thickness t (mm), E = 200000 MPa, ν = 0.3.</td></tr>
+    <tr><td><code>column(model, fy, lengths)</code></td><td>Py, the local and distortional minima and the DSM strengths of a continuously braced column: a dict with <code>Py</code>, <code>A</code>, <code>local</code>, <code>dist</code>, <code>dist_src</code>, <code>sig</code>, <code>ref</code>, <code>Pnl</code>, <code>Pnd</code>, <code>Pn</code>, <code>governs</code>.</td></tr>
+    <tr><td><code>d_only(ref, lengths)</code></td><td>Pcrd from a D-only constrained run where the curve has no distinct distortional minimum (<a href="#unverified">not verified</a>).</td></tr>
+    <tr><td><code>prequalified(D, B, d, t, fy)</code></td><td>The reasons a lipped C is outside the DSM pre-qualified column limits, <code>[]</code> inside (<a href="#unverified">not verified</a>).</td></tr>
+    <tr><td><code>dsm_pne</code>, <code>dsm_pnl</code>, <code>dsm_pnd</code></td><td>AISI S100-16 §E2, §E3, §E4.</td></tr>
+    <tr><td><code>logspace(a, b, n)</code>, <code>grid_minima(L, f)</code>, <code>PHI_C</code></td><td>n log-spaced values; a curve's minima as the page finds them; φc = 0.85.</td></tr>
+  </tbody>
+</table></div>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="python-api.html"><small>Previous</small>‹ Python API reference</a>
+    <a class="next" href="engine-api.html"><small>Next</small>Engine API (Rust / wasm) ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

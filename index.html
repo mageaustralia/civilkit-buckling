@@ -1,0 +1,209 @@
+<!doctype html>
+<!--
+  CivilKit Buckling (CUFSM): elastic buckling of thin-walled members in the browser, on the
+  cufsm-rs engine compiled to WebAssembly (cufsm.wasm, built by build-wasm.mjs). The finite strip
+  method with cFSM, and the finite tube method for circular tubes. Serve over http: the module
+  script and the engine are fetched, so a file:// page will not run.
+-->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="js/theme.js"></script>
+<title>CivilKit Buckling (CUFSM)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11151b" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icons/apple-touch-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Buckling">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles/shell.css">
+
+<div class="app">
+<header>
+  <div class="bar">
+    <a class="home" href="https://mageengineering.com.au/tools/" title="Back to all CivilKit tools">&larr; All tools</a>
+    <div class="brand"><a class="mark" href="https://mageengineering.com.au/">Civil<span>Kit</span></a><span class="sub">Buckling (CUFSM)</span><span class="netstate" id="netState" role="status" title="Offline: the analysis, your projects, the installed modules and the guide all keep working" hidden>Offline</span></div>
+    <div class="spacer"></div>
+    <button class="btn" id="themeBtn" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+  </div>
+  <div class="actions">
+    <button class="btn" id="shareBtn" title="Copy a link to this analysis">Copy link</button>
+    <button class="btn" id="reportBtn" title="A printable report of this analysis">Report</button>
+    <button class="btn" id="installBtn" title="Install CivilKit Buckling as an app on this device" hidden>Install</button>
+    <a class="btn" id="docsBtn" href="guide/" target="_blank" rel="noopener" title="The guide: extensions and the Python console (opens in a new tab)">Docs</a>
+    <a class="btn jump" href="#analysis">Analysis ↓</a>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="inputs" data-panel="section" aria-label="Analysis inputs">
+    <h2>Section</h2>
+    <div class="shapes" id="shapes"></div>
+    <div id="params"></div>
+    <div class="group">
+      <h2>Material</h2>
+      <div class="note" id="matSummary"></div>
+      <div class="field numfield fsm-only"><label for="fy">Yield f<sub>y</sub></label><div class="inp"><input id="fy" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false"><span class="u">MPa</span></div><div class="msg" role="alert" hidden></div></div>
+      <div class="note">E, ν and the shear modulus are the first row of the <b>Materials</b> table in
+        Nodes &amp; elements; f<sub>y</sub> (also in the Loads panel) drives first yield.</div>
+    </div>
+    <div class="group fsm-only">
+      <h2>Analysis</h2>
+      <div class="field stack"><span class="flabel" id="solLabel">Solution type</span>
+        <div class="seg" role="radiogroup" aria-labelledby="solLabel">
+          <label><input type="radio" name="sol" id="solSignature" checked><span>Signature curve</span></label>
+          <label title="General boundary conditions: end conditions and longitudinal terms over physical lengths"><input type="radio" name="sol" id="solGeneral"><span>General BC</span></label>
+        </div></div>
+      <div id="generalOnly" hidden>
+        <div class="field"><label for="bc">End conditions</label><div class="inp"><select id="bc">
+          <option>S-S</option><option>C-C</option><option>S-C</option><option>C-F</option><option>C-G</option>
+        </select></div></div>
+        <div class="field numfield"><label for="terms">Longitudinal terms</label><div class="inp"><input id="terms" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false"></div><div class="msg" role="alert" hidden></div></div>
+        <div id="shapeFn"></div>
+        <div class="recrow">
+          <button class="btn" id="recTerms" title="Longitudinal terms from the characteristic local and distortional half-wavelengths">Recommend m</button>
+        </div>
+      </div>
+      <div class="field numfield"><label for="neigs">Eigenvalues</label><div class="inp"><input id="neigs" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false"></div><div class="msg" role="alert" hidden></div></div>
+      <div class="field numfield"><label for="Lmin">Length min</label><div class="inp"><input id="Lmin" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false"><span class="u">mm</span></div><div class="msg" role="alert" hidden></div></div>
+      <div class="field numfield"><label for="Lmax">Length max</label><div class="inp"><input id="Lmax" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false"><span class="u">mm</span></div><div class="msg" role="alert" hidden></div></div>
+      <div class="field numfield"><label for="lensN">Length count</label><div class="inp"><input id="lensN" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false"></div><div class="msg" role="alert" hidden></div></div>
+      <div class="recrow">
+        <button class="btn" id="fillLog" title="Log-spaced lengths between min and max">Fill log-spaced</button>
+        <button class="btn" id="recLens" title="Lengths from the section's strips - CUFSM's recommended range">Recommend</button>
+      </div>
+      <div class="field" style="display:block"><label for="lengths" id="lengthsLabel">Half-wavelengths, one per line (mm)</label>
+        <textarea id="lengths" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>
+      <div class="note" id="lensDrop"></div>
+    </div>
+    <div class="group fsm-only">
+      <h2>Springs &amp; constraints</h2>
+      <div class="chips">
+        <button class="chip" id="springChip" title="Discrete or foundation springs (cufsm-rs supports them)">0 springs</button>
+        <button class="chip" id="constrChip" title="Master–slave equation constraints (cufsm-rs supports them)">0 constraints</button>
+        <button class="chip add" title="Add a spring row (the editors are in Nodes &amp; elements)">+ add</button>
+      </div>
+      <div class="note">Springs and equation constraints run in the engine; the row editors are in the <b>Nodes &amp; elements</b> tab.</div>
+    </div>
+  </section>
+
+  <section class="card" id="sectionCard" data-panel="section" aria-label="Section drawing">
+    <svg id="sectionSvg" class="sect" viewBox="0 0 420 420" role="img" aria-label="The cross-section"></svg>
+    <div class="canvasbar" role="toolbar" aria-label="Drawing">
+      <button type="button" class="btn icon" id="cvFit" title="Zoom to fit (double-tap the drawing)" aria-label="Zoom to fit"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button type="button" class="btn icon" id="cvOut" title="Zoom out" aria-label="Zoom out">−</button>
+      <button type="button" class="btn icon" id="cvIn" title="Zoom in" aria-label="Zoom in">+</button>
+      <button type="button" class="btn" id="cvAdd" aria-pressed="false" title="Each tap on the drawing adds a node, joined to the last one">＋ Node</button>
+      <span class="cvspace"></span>
+      <span class="cvgroup">
+      <button type="button" class="btn icon" id="cvUndo" title="Undo (⌘Z / Ctrl+Z)" aria-label="Undo" disabled><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+      <button type="button" class="btn icon" id="cvRedo" title="Redo (⇧⌘Z / Ctrl+Shift+Z)" aria-label="Redo" disabled><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button></span>
+    </div>
+    <div class="modelrow"><button type="button" class="btn" id="modelBtn" title="Materials, nodes, elements, springs and constraints">Model ▴</button></div>
+    <div class="cvhint" id="cvHint">Pinch to zoom · tap a node or strip to edit it · long-press a node to drag it</div>
+    <div class="legend" id="legend"></div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="card" id="analysis" data-panel="curve modes loads more" aria-label="Analysis">
+    <nav class="tabs" id="tabs">
+      <button class="tab" data-tab="sig">Signature</button>
+      <button class="tab" data-tab="mode">Mode shape</button>
+      <button class="tab" data-tab="mode3d">3D mode</button>
+      <button class="tab" data-tab="loads">Loads</button>
+      <button class="tab" data-tab="cfsm">cFSM</button>
+      <button class="tab" data-tab="tables">Nodes &amp; elements</button>
+      <button class="tab" data-tab="ftm">Tube buckling</button>
+      <button class="tab" data-tab="extensions">Extensions</button>
+      <button class="tab" data-tab="python">Python</button>
+      <button class="tab" data-tab="projects">Projects</button>
+    </nav>
+    <!-- compact: a shell tab with more than one view (More's four labels are kept short to fit a 320 px phone) gets its own switch (the in-card tab row is hidden) -->
+    <nav class="morenav" data-for="curve" role="tablist" aria-label="Curve views">
+      <button type="button" role="tab" aria-controls="pane" data-more="sig" aria-selected="true">Signature</button>
+      <button type="button" role="tab" aria-controls="pane" data-more="cfsm" aria-selected="false">cFSM</button>
+    </nav>
+    <nav class="morenav" data-for="modes" role="tablist" aria-label="Mode views">
+      <button type="button" role="tab" aria-controls="pane" data-more="mode" aria-selected="true">2D mode</button>
+      <button type="button" role="tab" aria-controls="pane" data-more="mode3d" aria-selected="false">3D mode</button>
+    </nav>
+    <nav class="morenav" data-for="more" role="tablist" aria-label="More">
+      <button type="button" role="tab" aria-controls="pane" data-more="projects" aria-selected="true">Projects</button>
+      <button type="button" role="tab" aria-controls="pane" data-more="tables" aria-selected="false" title="Nodes &amp; elements">Tables</button>
+      <button type="button" role="tab" aria-controls="pane" data-more="extensions" aria-selected="false">Extensions</button>
+      <button type="button" role="tab" aria-controls="pane" data-more="python" aria-selected="false">Python</button>
+    </nav>
+    <div class="pane" id="pane" tabindex="-1"></div>
+  </section>
+</main>
+
+<footer id="footer" data-panel="more">
+  <span id="footerNote">Signature curve, minima and mode shapes appear once the engine has loaded.</span>
+  The page runs the cufsm-rs engine (Rust, compiled to WebAssembly) in the browser: unconstrained
+  and constrained FSM, all five end conditions, springs and equation constraints, validated against CUFSM
+  and MATLAB to 1e-12. An analysis tool, not a design certificate: check what you use.
+  <!-- the public repository's URL: it must resolve once the repository is published -->
+  <p class="oss">Open source (<a href="https://github.com/mageaustralia/civilkit-buckling/blob/main/LICENSE">Apache-2.0</a>)
+    · <a href="https://github.com/mageaustralia/civilkit-buckling">GitHub</a>
+    · part of <a href="https://mageengineering.com.au">CivilKit</a></p>
+</footer>
+</div><!-- /.app: the container the layout classes are measured on -->
+
+<div id="busy" class="busy" role="status" aria-live="polite">
+  <span class="bspin"></span><span id="busyText">Solving…</span>
+  <span class="bbar"><i id="busyBar"></i></span>
+</div>
+
+<!-- the compact model editor: a virtual list per table; a row opens its editor sheet -->
+<div class="sheet modelsheet" id="modelSheet" role="dialog" aria-labelledby="modelSheetTitle" hidden>
+  <div class="sheethead"><h3 id="modelSheetTitle">Model</h3>
+    <button type="button" class="btn icon" data-close aria-label="Close">✕</button></div>
+  <nav class="morenav mseg" id="mlistSeg" role="tablist" aria-label="Model tables">
+    <button type="button" role="tab" aria-controls="mlist" data-mlist="materials">Materials</button><button type="button" role="tab" aria-controls="mlist" data-mlist="nodes">Nodes</button><button type="button" role="tab" aria-controls="mlist" data-mlist="elements">Elements</button><button type="button" role="tab" aria-controls="mlist" data-mlist="springs">Springs</button><button type="button" role="tab" aria-controls="mlist" data-mlist="constraints">Constraints</button>
+  </nav>
+  <div class="mlist" id="mlist"></div>
+  <div class="note" id="mlistEmpty" hidden></div>
+  <div class="sheetfoot"><button type="button" class="btn" id="mlistPaste">Paste / copy CUFSM</button>
+    <button type="button" class="btn primary" id="mlistAdd">＋ Add</button></div>
+</div>
+<div class="sheet editsheet" id="rowSheet" role="dialog" aria-labelledby="rowSheetTitle" hidden>
+  <div class="sheethead"><h3 id="rowSheetTitle">Row</h3>
+    <button type="button" class="btn icon" data-close aria-label="Close">✕</button></div>
+  <div class="sheetbody" id="rowSheetBody"></div>
+  <div class="sheetfoot"><button type="button" class="btn danger" id="rowDel">Delete</button>
+    <button type="button" class="btn primary" data-close>Done</button></div>
+</div>
+<!-- the touch editors: a bottom sheet on a phone, a floating panel beside the drawing on a tablet -->
+<div class="sheet editsheet" id="nodeSheet" role="dialog" aria-labelledby="nodeSheetTitle" hidden>
+  <div class="sheethead"><h3 id="nodeSheetTitle">Node</h3>
+    <button type="button" class="btn icon" data-close aria-label="Close">✕</button></div>
+  <div class="sheetbody" id="nodeSheetBody"></div>
+  <div class="sheetfoot"><button type="button" class="btn danger" id="nodeDel">Delete node</button>
+    <button type="button" class="btn primary" data-close>Done</button></div>
+</div>
+<div class="sheet editsheet" id="elemSheet" role="dialog" aria-labelledby="elemSheetTitle" hidden>
+  <div class="sheethead"><h3 id="elemSheetTitle">Element</h3>
+    <button type="button" class="btn icon" data-close aria-label="Close">✕</button></div>
+  <div class="sheetbody" id="elemSheetBody"></div>
+  <div class="sheetfoot"><button type="button" class="btn danger" id="elemDel">Delete element</button>
+    <button type="button" class="btn primary" data-close>Done</button></div>
+</div>
+<div class="apptoast" id="appToast" role="status" aria-live="polite" hidden><span></span><button type="button" class="btn"></button></div>
+<div class="apptoast swbar" id="swUpdate" role="status" aria-live="polite" hidden><span></span><button type="button" class="btn" data-act="reload">Reload</button><button type="button" class="btn" data-act="later">Later</button></div>
+
+<nav class="tabbar" role="tablist" aria-label="Views">
+  <button role="tab" data-go="section" aria-controls="inputs sectionCard" aria-selected="true"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5v17M6 3.5h11M6 20.5h11M17 20.5v-4"/></svg><span>Section</span></button>
+  <button role="tab" data-go="loads" aria-controls="analysis" aria-selected="false"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h13M14.5 5l3.5 3.5-3.5 3.5M20 15.5H7M9.5 12 6 15.5l3.5 3.5"/></svg><span>Loads</span></button>
+  <button role="tab" data-go="curve" aria-controls="analysis" aria-selected="false"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3.5V20h16M7.5 16.5l3.5-4.5 3 2.5 4.5-6.5"/></svg><span class="fsm-lbl">Curve</span><span class="tube-lbl">Results</span></button>
+  <button role="tab" data-go="modes" aria-controls="analysis" aria-selected="false"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c1.5-5 3-5 4.5 0s3 5 4.5 0 3-5 4.5 0 3 5 4.5 0"/></svg><span>Modes</span></button>
+  <button role="tab" data-go="more" aria-controls="analysis footer" aria-selected="false"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="5.5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg><span>More</span></button>
+</nav>
+
+
+</body>
+</html>
+<script type="module" src="app.js"></script>

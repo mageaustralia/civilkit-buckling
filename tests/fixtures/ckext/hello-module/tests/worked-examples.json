@@ -1,0 +1,212 @@
+[
+ {
+  "id": "video-c-py",
+  "input": {
+   "fy": 50
+  },
+  "model": {
+   "mats": [
+    {
+     "id": 100,
+     "ex": 29500,
+     "ey": 29500,
+     "vx": 0.3,
+     "vy": 0.3,
+     "g": 11346.15
+    }
+   ],
+   "nodes": [
+    {
+     "x": 5,
+     "z": 1,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": -38.889
+    },
+    {
+     "x": 5,
+     "z": 0,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": -50
+    },
+    {
+     "x": 2.5,
+     "z": 0,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": -50
+    },
+    {
+     "x": 0,
+     "z": 0,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": -50
+    },
+    {
+     "x": 0,
+     "z": 3,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": -16.667
+    },
+    {
+     "x": 0,
+     "z": 6,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": 16.667
+    },
+    {
+     "x": 0,
+     "z": 9,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": 50
+    },
+    {
+     "x": 2.5,
+     "z": 9,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": 50
+    },
+    {
+     "x": 5,
+     "z": 9,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": 50
+    },
+    {
+     "x": 5,
+     "z": 8,
+     "free": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "stress": 38.889
+    }
+   ],
+   "elems": [
+    {
+     "i": 0,
+     "j": 1,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 1,
+     "j": 2,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 2,
+     "j": 3,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 3,
+     "j": 4,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 4,
+     "j": 5,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 5,
+     "j": 6,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 6,
+     "j": 7,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 7,
+     "j": 8,
+     "t": 0.1,
+     "mat": 100
+    },
+    {
+     "i": 8,
+     "j": 9,
+     "t": 0.1,
+     "mat": 100
+    }
+   ],
+   "springs": [],
+   "constraints": [],
+   "loads": {
+    "P": 1,
+    "restrained": false
+   },
+   "fy": 50,
+   "analysis": {
+    "solution": "signature",
+    "bc": "S-S",
+    "terms": 1,
+    "neigs": 5,
+    "lengths": []
+   }
+  },
+  "expected": {
+   "result": [
+    {
+     "label": "Py",
+     "value": 105,
+     "unit": "N"
+    }
+   ]
+  },
+  "source": "Hand calc on the CUFSM video's 10-node lipped C (tests/fixtures/video-c.json), in the video's units (ksi and in; the engine is unit-free, so the force labelled N here is kip). Centreline length 1 + 5 + 9 + 5 + 1 = 21, t = 0.1: A = 21 x 0.1 = 2.1; Py = fy A = 50 x 2.1 = 105."
+ }
+]

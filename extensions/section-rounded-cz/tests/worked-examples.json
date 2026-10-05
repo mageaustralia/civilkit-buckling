@@ -1,0 +1,107 @@
+[
+ {
+  "id": "cufsm-template-lipped-c-rounded",
+  "input": {
+   "shape": "C",
+   "dims": "centreline",
+   "h": 200,
+   "b1": 75,
+   "b2": 75,
+   "d1": 20,
+   "d2": 20,
+   "r": 3,
+   "t": 1.5,
+   "nh": 6,
+   "nb": 3,
+   "nd": 2,
+   "nr": 2,
+   "E": 203000,
+   "nu": 0.3,
+   "propose": true
+  },
+  "expected": {
+   "result": [
+    {
+     "label": "Nodes",
+     "value": 25
+    },
+    {
+     "label": "A",
+     "value": 612.5532071302864,
+     "unit": "mm²"
+    },
+    {
+     "label": "Ixx",
+     "value": 4160691.6250779536,
+     "unit": "mm⁴"
+    },
+    {
+     "label": "Izz",
+     "value": 584392.076363066,
+     "unit": "mm⁴"
+    }
+   ]
+  },
+  "source": "CUFSM templatecalc.m via the cufsm-rs Octave oracle: case 'lipped-c rounded compression' in cufsm-rs oracle/cases.py (template(1, 200, 75, 75, 20, 20, 3.0, 1.5, nh=6, nb=3, nd=2, nr=2; centreline dimensions)), run in Octave on CUFSM at commit d16e281; A, Ixx, Izz are the 'props' that run recorded in cufsm-rs tests/fixtures/cufsm_octave.json, and Nodes is the length of its node list."
+ },
+ {
+  "id": "cufsm-template-lipped-z-outside",
+  "input": {
+   "shape": "Z",
+   "dims": "outside",
+   "h": 200,
+   "b1": 76,
+   "b2": 70,
+   "d1": 15,
+   "d2": 15,
+   "r": 3,
+   "t": 1.9,
+   "nh": 8,
+   "nb": 4,
+   "nd": 2,
+   "nr": 2,
+   "E": 203000,
+   "nu": 0.3,
+   "propose": true
+  },
+  "expected": {
+   "result": [
+    {
+     "label": "Nodes",
+     "value": 29
+    },
+    {
+     "label": "A",
+     "value": 685.8726265584,
+     "unit": "mm²"
+    },
+    {
+     "label": "Ixx",
+     "value": 4192154.1732115755,
+     "unit": "mm⁴"
+    },
+    {
+     "label": "Izz",
+     "value": 690341.7777091812,
+     "unit": "mm⁴"
+    },
+    {
+     "label": "Ixz",
+     "value": -1250769.9642270324,
+     "unit": "mm⁴"
+    },
+    {
+     "label": "I11",
+     "value": 4593014.230594994,
+     "unit": "mm⁴"
+    },
+    {
+     "label": "I22",
+     "value": 289481.72032576334,
+     "unit": "mm⁴"
+    }
+   ]
+  },
+  "source": "CUFSM templatecalc.m via the cufsm-rs Octave oracle: case 'outside-dims lipped-z compression' in cufsm-rs oracle/cases.py (template(2, 200, 76, 70, 15, 15, 3.0, 1.9, nh=8, nb=4, nd=2, nr=2; outside dimensions and inside radii through template_out_to_in.m)), run in Octave on CUFSM at commit d16e281; A, Ixx, Izz, Ixz, I11, I22 are the 'props' that run recorded in cufsm-rs tests/fixtures/cufsm_octave.json, and Nodes is the length of its node list."
+ }
+]

@@ -1,0 +1,221 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>Using extensions · CivilKit Buckling guide</title>
+<meta name="description" content="Install a module from the store or from a file, open it, run it on the section in your analysis, and decide what to do with any section it proposes. Nothing a module does changes your analysis unless you say so.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html" aria-current="page"><span class="g-num">2</span> Using extensions</a>
+      <ul>
+        <li><a href="#open">Where Extensions is</a></li>
+        <li><a href="#install">Installing a module</a></li>
+        <li><a href="#badges">The badges</a></li>
+        <li><a href="#run">Opening and running a module</a></li>
+        <li><a href="#view-code">View code and fork</a></li>
+        <li><a href="#proposals">Section proposals</a></li>
+        <li><a href="#uninstall">Uninstalling</a></li>
+        <li><a href="#where">Where installed modules live</a></li>
+        <li><a href="#sandbox">What the sandbox prevents</a></li>
+        <li><a href="#phones">On a phone</a></li>
+      </ul></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html"><span class="g-num">9</span> The Python console</a></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">Using extensions</h1>
+<p class="g-lede">Install a module from the store or from a file, open it, run it on the section in your analysis, and
+decide what to do with any section it proposes. Nothing a module does changes your analysis unless you say so.</p>
+
+<h2 id="open">Where Extensions is<a class="g-anchor" href="#open" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li><b>On a desktop or tablet:</b> the <span class="ui">Extensions</span> tab in the analysis card, after
+    <span class="ui">Tube buckling</span>.</li>
+  <li><b>On a phone:</b> <span class="ui">More</span> in the bottom bar, then the <span class="ui">Extensions</span>
+    switch at the top (beside <span class="ui">Nodes &amp; elements</span>).</li>
+</ul>
+<p>The Extensions view has four parts: the install box, <span class="ui">Installed</span>, <span class="ui">Store</span>, and
+<span class="ui">New module…</span>, which opens the <a href="tutorial.html">module builder</a>. The
+<span class="ui">?</span> beside the heading opens this guide in a new tab, so your analysis stays as it is.</p>
+
+<h2 id="install">Installing a module<a class="g-anchor" href="#install" aria-label="Link to this section">#</a></h2>
+<h3 id="store">From the store<a class="g-anchor" href="#store" aria-label="Link to this section">#</a></h3>
+<p>The <span class="ui">Store</span> lists the modules published with the app. Each row has a button:</p>
+<ul>
+  <li><span class="ui">Install</span>: not installed yet;</li>
+  <li><span class="ui">Update</span>: installed, but the store has a different version;</li>
+  <li><span class="ui">Installed</span> (disabled): you have the store's version.</li>
+</ul>
+<p>The store only ever lists Verified modules: <a href="cli.html#store">the store build</a> leaves out any module whose
+worked examples do not reproduce.</p>
+
+<h3 id="file">From a file<a class="g-anchor" href="#file" aria-label="Link to this section">#</a></h3>
+<p>Drop a <code>.ckext</code> file on the dashed box, or press <span class="ui">Choose a file…</span>. The app reads the
+bundle, checks its manifest, and runs its worked examples in the sandbox to decide the badge. The status line under the
+box then reads, for example:</p>
+<pre><code>Installed Squash load 1.0.0 (Verified).</code></pre>
+<p>or, when an example does not reproduce its numbers, why:</p>
+<pre><code>Installed Squash load 1.0.0 (Community). Worked example lipped-c-150-60-40: Py: expected 236.25, got 240</code></pre>
+<p>A bundle that is not a module for this app is refused, and nothing is installed. The common refusals are listed under
+<a href="faq.html#install-errors">install errors</a>; a module written for CivilKit Studio gets
+<code>This module is for CivilKit Studio: …</code>.</p>
+<p>Installing a module whose <code>id</code> is already installed replaces it (a new version, or your own edited copy).
+A <a href="#view-code">fork</a> has its own id, so it installs beside the original.</p>
+
+<h2 id="badges">The badges<a class="g-anchor" href="#badges" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Badge</th><th>Means</th></tr></thead>
+  <tbody>
+    <tr><td><b>Verified</b></td><td>The module has at least one worked example, and every one reproduced its cited numbers within 0.1 % when it was installed, in this browser.</td></tr>
+    <tr><td><b>Community</b></td><td>Anything else: no worked examples, one that failed, or one that stopped with an error.</td></tr>
+  </tbody>
+</table></div>
+<p>Hover over (or long-press) a badge and its tooltip says exactly what it is worth:</p>
+<pre><code>Verified: every worked example reproduced its cited numbers. This is a test gate, not a review.</code></pre>
+<p>Verified tells you that the module reproduces the numbers its author cited. It does not tell you that those examples
+are the right ones, that the module covers your case, or that its clause references are current. Read its examples (in
+<a href="#view-code">View code</a>) before you rely on it. <a href="worked-examples.html">Worked examples and the
+badge</a> has the rules.</p>
+
+<h2 id="run">Opening and running a module<a class="g-anchor" href="#run" aria-label="Link to this section">#</a></h2>
+<p>Press <span class="ui">Open</span> on an installed module. Its view replaces the Extensions list (full screen on a
+phone), with a bar across the top: <span class="ui">‹ Extensions</span> to go back, the module's name, its badge, its
+version and <span class="ui">View code</span>.</p>
+<ul>
+  <li>The form is the module's own. Fill it in and press its run button (a module labels it; often
+    <span class="ui">Run</span>). Changing a field also runs the module again.</li>
+  <li>While it runs, <span class="ui">Running…</span> shows and its buttons are disabled.</li>
+  <li>Results, calc lines and charts appear under the form. A calc block has a <span class="ui">Copy</span> button that
+    copies its lines as plain text, ready for a calc sheet.</li>
+  <li>An error shows in a red box at the top of the module, beginning with the module's name. The rest of the app is
+    unaffected.</li>
+</ul>
+
+<h3 id="sees">What a module sees<a class="g-anchor" href="#sees" aria-label="Link to this section">#</a></h3>
+<p>Each run gets a copy of the analysis as it stands: the nodes, elements, materials, springs and constraints, the
+reference loads and fy from the Loads panel, and the analysis settings (signature curve or general BC, end conditions,
+terms, lengths). If the app has solved the curve, the module can also read it and its classified minima. It works on a
+copy: nothing it does reaches your model, except a <a href="#proposals">section it proposes</a> that you accept.</p>
+
+<h2 id="view-code">View code and fork<a class="g-anchor" href="#view-code" aria-label="Link to this section">#</a></h2>
+<p><span class="ui">View code</span> opens the module's files read-only: <code>main.py</code> (highlighted, with line
+numbers), its manifest and its worked examples. Read the examples' <code>source</code> lines here before relying on the
+module.</p>
+<p><span class="ui">Edit &amp; run as a fork</span> copies the module into the builder and runs it. The copy gets its own
+id (the original's with <code>-fork</code>) and name (with <code>(fork)</code>), so installing it never replaces the
+original. If the builder held a draft of yours, the fork replaces it, and the toast offers <span class="ui">Undo</span>.
+The <span class="ui">?</span> in View code opens the <a href="capabilities.html">capability reference</a>.</p>
+
+<h2 id="proposals">Section proposals<a class="g-anchor" href="#proposals" aria-label="Link to this section">#</a></h2>
+<p>A module with the <code>proposeModel</code> capability can offer a section to the analysis, as the
+<a href="reference-modules.html#section-rounded-cz">Rounded C / Z section</a> module does. The app never applies it on
+its own. A banner appears in the module view:</p>
+<pre><code>Rounded C / Z section proposes a section: 25 nodes, 24 elements.   [Preview] [Use it] [Dismiss]</code></pre>
+<ul>
+  <li><span class="ui">Preview</span> draws the proposed section, dashed, over the current one in the section card
+    (on a phone, inside the banner). Press it again (<span class="ui">Hide preview</span>) to stop. Nothing changes.</li>
+  <li><span class="ui">Use it</span> puts the section into the analysis, with the proposal's loads, fy and analysis
+    settings when it carries them. The app recomputes the reference stresses from the loads, and solves. A toast says <code>The section from ‹module› is now in the analysis.</code> with
+    <span class="ui">Undo</span>. It is also one step in the app's undo history, so ↶ takes it back too.</li>
+  <li><span class="ui">Dismiss</span> removes the banner.</li>
+</ul>
+<p>The app validates every proposal before it is offered. One that refers to a node that does not exist, has an
+element of zero thickness, an undefined material, more than 5000 nodes, or coordinates that are not finite numbers is
+not offered; the module view shows <code>‹module› proposed an invalid section: ‹reason›</code> instead.</p>
+<p>After you use a proposal, a note in the module view says <code>The section in the analysis has changed: Run the
+module again to update its results.</code> Its earlier results were computed on the old section.</p>
+
+<h2 id="uninstall">Uninstalling<a class="g-anchor" href="#uninstall" aria-label="Link to this section">#</a></h2>
+<p><span class="ui">Uninstall</span> removes the module straight away; the toast that says
+<code>Uninstalled ‹module›.</code> has <span class="ui">Undo</span>, which installs the same files again (and runs the
+worked examples again for the badge).</p>
+
+<h2 id="where">Where installed modules live<a class="g-anchor" href="#where" aria-label="Link to this section">#</a></h2>
+<p>In <b>this browser</b>, for this site: the app keeps installed modules in the browser's own storage (IndexedDB). They
+are not uploaded anywhere, and they do not follow you to another browser or device. Clearing the site's data removes
+them; a private window forgets them when it closes. To move a module, keep its <code>.ckext</code> file (the builder's
+<span class="ui">Export .ckext</span> makes one) and install it again.</p>
+<p>The builder's draft is kept the same way, in this browser's local storage.</p>
+
+<h2 id="sandbox">What the sandbox prevents<a class="g-anchor" href="#sandbox" aria-label="Link to this section">#</a></h2>
+<p>A module's Python never runs on the page. It runs in a separate Web Worker with MicroPython and the engine, started
+under the page's Content Security Policy. Before any module code runs, the worker removes what a module could otherwise
+reach through MicroPython's <code>js</code> module:</p>
+<ul>
+  <li><b>No network:</b> <code>fetch</code>, <code>XMLHttpRequest</code>, <code>WebSocket</code>,
+    <code>EventSource</code>, <code>WebTransport</code> and <code>importScripts</code> are gone, and the page's policy
+    allows connections only to the app's own site.</li>
+  <li><b>No storage:</b> no IndexedDB, no cache storage, and a worker has no <code>localStorage</code> or cookies.</li>
+  <li><b>No page:</b> a worker has no DOM. A module returns plain data; the app draws every element and sets all text
+    as text, so a module cannot inject markup.</li>
+  <li><b>No new workers, no <code>eval</code>, no <code>navigator</code>.</b></li>
+  <li><b>No forged messages:</b> the worker's channel to the page is removed from module reach, and the page only
+    accepts messages that carry a token module code cannot read.</li>
+  <li><b>Only declared capabilities:</b> a call to a capability the manifest does not list stops the module.</li>
+  <li><b>Time limits:</b> each call (opening the module, each run, each worked example at install) has 20 seconds.
+    A module that takes longer, or loops forever, is stopped with <code>The module stopped responding and was
+    stopped.</code> The worker restarts and the app keeps working; the next <span class="ui">Run</span> starts the
+    module afresh.</li>
+</ul>
+<p>The Python <code>import</code> statement is not the boundary: the worker and the page's policy are. A module can import
+<code>js</code>; it finds nothing there worth having.</p>
+
+<h2 id="phones">On a phone<a class="g-anchor" href="#phones" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li><span class="ui">More</span> › <span class="ui">Extensions</span> opens the list.</li>
+  <li>A module opens full screen; the system back gesture (or <span class="ui">‹ Extensions</span>) closes it.</li>
+  <li>A proposal's preview draws inside its banner, since the section card is not on screen.</li>
+  <li>The builder works, but says <code>Best on a tablet or desktop</code>: code is easier to write on a larger screen.
+    View code works everywhere.</li>
+</ul>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="index.html"><small>Previous</small>‹ Overview</a>
+    <a class="next" href="tutorial.html"><small>Next</small>Tutorial: your first module ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

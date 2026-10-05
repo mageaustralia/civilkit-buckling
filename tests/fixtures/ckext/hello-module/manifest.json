@@ -1,0 +1,16 @@
+{
+  "id": "test.hello-verified",
+  "name": "Hello (verified)",
+  "version": "1.0.0",
+  "civilkitApi": "^1.0",
+  "description": "Fixture: first yield Py through the capability, with a worked example",
+  "contributes": [
+    {
+      "point": "buckling.tool",
+      "id": "main"
+    }
+  ],
+  "capabilities": [
+    "firstYield"
+  ]
+}

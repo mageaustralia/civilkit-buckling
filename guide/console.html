@@ -1,0 +1,213 @@
+<!doctype html>
+<!-- The CivilKit Buckling guide (extensions and the Python console). Static: edit this page directly. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<script src="../js/theme.js"></script>
+<title>The Python console · CivilKit Buckling guide</title>
+<meta name="description" content="The Python console runs your own cufsm-rs-py scripts in the page, on the same engine as the analysis: loops of analyses, design checks and studies, with their printed output and figures.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 4v24M8 4h10M8 28h10' stroke='%23b8b3a8' stroke-width='4' fill='none'/%3E%3Ccircle cx='8' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='8' cy='28' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='4' r='3' fill='%23334'/%3E%3Ccircle cx='18' cy='28' r='3' fill='%23334'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="guide.css">
+<script type="module" src="guide.js"></script>
+
+<body class="guide">
+<a class="g-skip" href="#content">Skip to the guide</a>
+<header class="g-top">
+  <a class="g-back" href="../" title="Open CivilKit Buckling">‹ Back<span class="long">&nbsp;to the app</span></a>
+  <a class="g-brand" href="index.html">Civil<span>Kit</span> Buckling <small>· Guide</small></a>
+  <span class="spacer"></span>
+  <a class="btn g-navbtn" href="#g-nav" aria-controls="g-nav" aria-expanded="false">Contents</a>
+  <button class="btn g-theme" type="button" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+</header>
+<div class="g-layout">
+  <nav class="g-nav" id="g-nav" aria-label="Guide pages">
+    <div class="g-navtitle" id="g-navgroup-1">CivilKit Buckling guide</div>
+    <ol aria-labelledby="g-navgroup-1">
+    <li><a href="index.html"><span class="g-num">1</span> Overview</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-2">Extensions</div>
+    <ol aria-labelledby="g-navgroup-2">
+    <li><a href="using.html"><span class="g-num">2</span> Using extensions</a></li>
+    <li><a href="tutorial.html"><span class="g-num">3</span> Tutorial: your first module</a></li>
+    <li><a href="capabilities.html"><span class="g-num">4</span> Capability reference</a></li>
+    <li><a href="ui.html"><span class="g-num">5</span> UI reference</a></li>
+    <li><a href="worked-examples.html"><span class="g-num">6</span> Worked examples and the badge</a></li>
+    <li><a href="cli.html"><span class="g-num">7</span> The ckext command line</a></li>
+    <li><a href="reference-modules.html"><span class="g-num">8</span> Reference modules</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-3">Python</div>
+    <ol aria-labelledby="g-navgroup-3">
+    <li><a href="console.html" aria-current="page"><span class="g-num">9</span> The Python console</a>
+      <ul>
+        <li><a href="#what">What it is</a></li>
+        <li><a href="#where">Where it is</a></li>
+        <li><a href="#first">A first script</a></li>
+        <li><a href="#toolbar">The toolbar</a></li>
+        <li><a href="#links">?py= links</a></li>
+        <li><a href="#output">Output and figures</a></li>
+        <li><a href="#stop">Stop</a></li>
+        <li><a href="#drafts">Drafts and files</a></li>
+        <li><a href="#limits">Limits</a></li>
+      </ul></li>
+    <li><a href="runtimes.html"><span class="g-num">10</span> MicroPython and full Python</a></li>
+    <li><a href="python-api.html"><span class="g-num">11</span> Python API reference</a></li>
+    <li><a href="examples.html"><span class="g-num">12</span> Python examples</a></li>
+    <li><a href="engine-api.html"><span class="g-num">13</span> Engine API (Rust / wasm)</a></li>
+    </ol>
+    <div class="g-navtitle" id="g-navgroup-4">Help</div>
+    <ol aria-labelledby="g-navgroup-4">
+    <li><a href="faq.html"><span class="g-num">14</span> Troubleshooting and FAQ</a></li>
+    </ol>
+  </nav>
+  <main class="g-main" id="content">
+  <article>
+<h1 id="top">The Python console</h1>
+<p class="g-lede">The console runs your own Python scripts in the page, on the same engine as the analysis. A script
+written for <a href="https://github.com/mageaustralia/cufsm-rs-py">cufsm-rs-py</a>, the Python package
+(<code>pip install cufsm-rs-py</code>), runs here as it does on your own machine, with the same numbers.</p>
+
+<h2 id="what">What it is<a class="g-anchor" href="#what" aria-label="Link to this section">#</a></h2>
+<p>The app's buttons solve one section at a time. A script can solve hundreds: sweep a dimension, search a catalogue,
+check every result against a design rule, and print a table. The console is where such a script runs without
+installing anything.</p>
+<ul>
+  <li><b>The same API as the package.</b> <code>import cufsm_rs</code> gives the names, signatures and defaults of
+    cufsm-rs-py: <code>Model</code>, <code>section_properties</code>, <code>first_yield</code>, <code>stress</code>,
+    <code>signature</code>, <code>strip</code>, <code>classify</code>, the templates and <code>cufsm_rs.plot</code>.
+    The <a href="python-api.html">Python API reference</a> lists them all.</li>
+  <li><b>The same engine.</b> Every load factor, mode and property comes from <code>cufsm.wasm</code>, the Rust
+    engine the analysis on screen uses (<a href="engine-api.html">Engine API</a>).</li>
+  <li><b>Two Pythons.</b> Most scripts run at once on MicroPython, which the page already has. A script that uses
+    numpy, scipy or matplotlib runs on full Python (Pyodide), downloaded the first time a script needs it, once you
+    agree. <a href="runtimes.html">MicroPython and full Python</a> explains how the console chooses.</li>
+  <li><b>Your device only.</b> A script runs in a background worker in your browser. There is no server: nothing
+    you type or run is sent anywhere.</li>
+</ul>
+<p>The console is for your own scripts. To give other people a tool with a form and a Verified badge, write an
+<a href="index.html">extension</a> instead; extensions stay on MicroPython, in the sandbox
+(<a href="faq.html#faq-numpy-ext">why</a>).</p>
+
+<h2 id="where">Where it is<a class="g-anchor" href="#where" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li><b>On a phone:</b> <span class="ui">More</span> in the tab bar, then <span class="ui">Python</span> in its
+    switch (<span class="ui">Projects</span> | <span class="ui">Tables</span> | <span class="ui">Extensions</span> |
+    <span class="ui">Python</span>).</li>
+  <li><b>On a desktop or tablet:</b> the <span class="ui">Python</span> tab in the results pane's row of tabs.</li>
+</ul>
+<p>The console's code, MicroPython and the <code>cufsm_rs</code> package load when you first open it, so a visit that
+never opens it downloads nothing extra. The first time, the editor holds the analysis on screen as a script (see
+<a href="#toolbar">Use the model on screen</a>); after that it holds whatever you left in it.</p>
+<p>The console's <span class="ui">Docs</span> link opens this page.</p>
+
+<h2 id="first">A first script<a class="g-anchor" href="#first" aria-label="Link to this section">#</a></h2>
+<p>Paste this into the editor and press <span class="ui">Run</span> (or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>, on a Mac
+<kbd>⌘</kbd>+<kbd>Enter</kbd>):</p>
+<pre><code class="language-python" data-check="micropython">import cufsm_rs as fsm
+from cufsm_rs.plot import plot_signature
+
+m = fsm.lipped_c(200, 76, 15, 1.9, ri=3)   # outside dimensions and inside radius, mm; steel E in MPa
+y = fsm.first_yield(m, fy=450)              # N and N·mm
+mc = fsm.stress(m, P=y.Py)                  # uniform compression at the squash load
+sig = fsm.signature(mc)                     # CUFSM's 100 default half-wavelengths
+print(sig)
+for (L, lf), c in zip(sig.minima, sig.classify_minima()):
+    print("%6.0f mm  Pcr = %.3f Py  G %3.0f%%  D %3.0f%%  L %3.0f%%" % (L, lf, c[0], c[1], c[2]))
+plot_signature(sig, classify=True)</code></pre>
+<div class="g-see">a line <code>StripResult(signature, bc=S-S, 100 lengths …, neigs=1, … minima)</code>, one line per
+minimum of the curve with its load factor as a fraction of the squash load and its cFSM classification, then the
+signature curve with the minima labelled. The badge above the output reads <span class="ui">Ran on: MicroPython</span>.</div>
+<p>Because the reference stresses were set from <code>P = Py</code>, each load factor reads directly as
+<code>Pcr / Py</code> (<a href="python-api.html#load-factor">load factors</a>).</p>
+
+<h2 id="toolbar">The toolbar<a class="g-anchor" href="#toolbar" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Control</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><span class="ui">Run</span></td><td>Runs the script in the editor. <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>⌘</kbd>+<kbd>Enter</kbd> does the same anywhere in the console.</td></tr>
+    <tr><td><span class="ui">Stop</span></td><td>Ends a script that is still running (<a href="#stop">Stop</a>). Also answers a download prompt that is still waiting.</td></tr>
+    <tr><td><span class="ui">Examples…</span></td><td>Loads one of the shipped scripts. The ones under <i>Full Python (downloads Pyodide when you agree)</i> need full Python. <a href="examples.html">Python examples</a> describes each.</td></tr>
+    <tr><td><span class="ui">Use the model on screen</span></td><td>Puts the analysis on screen in the editor as a cufsm-rs-py script: the model as CUFSM's tables, row for row at full precision, and the same analysis (signature curve, or General BC with its end conditions and terms). The same script as the report's "analysis as Python". Run it and it prints the page's own minima.</td></tr>
+    <tr><td><span class="ui">Open…</span></td><td>Opens a <code>.py</code> or <code>.txt</code> file in the editor. Dropping a file on the editor does the same.</td></tr>
+    <tr><td><span class="ui">Download</span></td><td>Saves the editor's text as a <code>.py</code> file: the name of the file or example you loaded, or <code>buckling-script.py</code>.</td></tr>
+    <tr><td><span class="ui">⤢ Full view</span></td><td>The console over the whole screen, with the editor beside its output on a wide screen. The same button, or <kbd>Esc</kbd>, closes it.</td></tr>
+    <tr><td><span class="ui">Save output</span></td><td>Shown after a run with output. Saves the output, and the traceback if there is one, as a <code>.txt</code> file (<a href="#output">figures</a> become a line such as <code>[figure: signature curve]</code>).</td></tr>
+    <tr><td><span class="ui">Remove full Python from this device</span></td><td>Shown once full Python is stored on the device. Deletes it, and the "always" choice (<a href="runtimes.html#always">Always, Remove and offline</a>).</td></tr>
+  </tbody>
+</table></div>
+<p>Loading an example, a file or the model on screen replaces the editor's text through the browser's own editing, so
+<kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>⌘</kbd>+<kbd>Z</kbd>) brings back what was there. On a touch screen the text is set
+directly, so the keyboard does not pop up; Undo cannot bring it back there, so <span class="ui">Download</span> first
+if you want to keep it.</p>
+
+<h2 id="links"><code>?py=</code> links<a class="g-anchor" href="#links" aria-label="Link to this section">#</a></h2>
+<p>A link to the app with <code>?py=</code> and an example's file name opens the console with that example in the
+editor. It does not run it: press <span class="ui">Run</span>.</p>
+<pre><code>https://mageengineering.com.au/apps/buckling/?py=dsm_lip_study.py
+https://mageengineering.com.au/apps/buckling/?py=full/readme_quickstart.py</code></pre>
+<p>The name must be one of the <a href="examples.html">shipped examples</a> (the full-Python ones start with
+<code>full/</code>); any other name leaves the editor unchanged and says there is no such example. Your own scripts
+cannot be shared this way: send the <code>.py</code> file.</p>
+
+<h2 id="output">Output and figures<a class="g-anchor" href="#output" aria-label="Link to this section">#</a></h2>
+<p>A run's output appears all at once when the script finishes, never partway. While it runs, the status line counts
+the seconds. When it ends, the status line says how long it took and how many figures it drew, and the badge says
+which Python ran it: <span class="ui">Ran on: MicroPython</span> or <span class="ui">Ran on: full Python
+(Pyodide)</span>. When full Python ran it, or you chose not to download it, a line under the badge says why
+(<a href="runtimes.html#badge">the badge</a>).</p>
+<ul>
+  <li><b>Printed text</b> appears as printed, with each figure in its place between the lines.</li>
+  <li><b>An error</b> shows its Python traceback, and the editor marks the script's line that raised it. A missing
+    module (on MicroPython) shows a note instead, naming the full Python runtime.</li>
+  <li><b><code>cufsm_rs.plot</code> on MicroPython</b> draws with the page's own drawing code: an SVG in the page's
+    colours, which follows the light or dark theme, with a <span class="ui">Download SVG</span> button that saves it
+    in the colours on screen. <a href="python-api.html#plot">The plot functions</a> lists what differs from
+    matplotlib.</li>
+  <li><b>matplotlib on full Python</b> (including <code>cufsm_rs.plot</code> there) draws the figure exactly as
+    matplotlib does. Each figure appears where the script calls <code>plt.show()</code>; figures still open when the
+    script ends appear at the end. Each is shown as an image of its SVG, with <span class="ui">Download SVG</span>.</li>
+  <li>Every figure has a text alternative for screen readers, read from what it shows (its title, axes and contents).</li>
+</ul>
+<p>Each run starts afresh: nothing a script defines is left for the next one. On MicroPython every run gets a new
+interpreter; on full Python every run gets fresh globals and a clean matplotlib, and the packages already loaded stay
+loaded, so a second run does not download them again.</p>
+
+<h2 id="stop">Stop<a class="g-anchor" href="#stop" aria-label="Link to this section">#</a></h2>
+<p>There is no time limit on a console script (unlike an extension's 20 seconds): the
+<a href="examples.html#end-conditions">end conditions example</a> can take up to about 25 seconds. <span class="ui">Stop</span>
+ends a run that should not go on, such as an endless loop. The console's background workers are ended and a fresh
+MicroPython one is started; nothing the script printed is kept. If full Python was loaded, it is unloaded too, and the
+next script that needs it starts it again from the device's copy (no download).</p>
+
+<h2 id="drafts">Drafts and files<a class="g-anchor" href="#drafts" aria-label="Link to this section">#</a></h2>
+<p>The editor's text is saved as you type, with its file name, in this browser's storage for this site. Close the tab
+and come back, and it is there. It is one draft per browser on one device: another browser or device, a private
+window, or clearing the site's data starts afresh, with the analysis on screen as a script. Nothing is uploaded.
+Keep the scripts that matter as files: <span class="ui">Download</span> saves one, and <span class="ui">Open…</span>
+brings it back.</p>
+<p>Open takes a <code>.py</code> or <code>.txt</code> file (or any text file) of up to 1 MB, in UTF-8. A file that is
+too large, is not text or is another kind of file is refused with a message, and the editor is left as it was.</p>
+
+<h2 id="limits">Limits<a class="g-anchor" href="#limits" aria-label="Link to this section">#</a></h2>
+<div class="g-table"><table>
+  <thead><tr><th>Limit</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Output kept from one run</td><td>1 MB of text (1,048,576 characters); the output then says it was cut off</td></tr>
+    <tr><td>Figures in one run</td><td>50; the 51st raises an error</td></tr>
+    <tr><td>A file opened in the editor</td><td>1 MB, text (UTF-8)</td></tr>
+    <tr><td>Python heap on MicroPython</td><td>64 MB</td></tr>
+    <tr><td>Time</td><td>none; use <span class="ui">Stop</span></td></tr>
+    <tr><td>Modules on MicroPython</td><td>see <a href="runtimes.html#choose">How the console picks one</a></td></tr>
+  </tbody>
+</table></div>
+  </article>
+  <nav class="g-pager" aria-label="Previous and next page">
+    <a class="prev" href="reference-modules.html"><small>Previous</small>‹ Reference modules</a>
+    <a class="next" href="runtimes.html"><small>Next</small>MicroPython and full Python ›</a>
+  </nav>
+  <p class="g-foot">CivilKit Buckling runs <a href="https://github.com/mageaustralia/cufsm-rs">cufsm-rs</a>, a Rust port of
+  CUFSM, the finite strip software by Benjamin W. Schafer and co-workers (constrained FSM with Sándor Ádány),
+  compiled to WebAssembly. An analysis tool, not a design certificate: check what you use.</p>
+  </main>
+</div>

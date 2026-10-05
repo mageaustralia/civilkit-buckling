@@ -1,0 +1,24 @@
+CivilKit Buckling
+Copyright 2026 Matthew Campbell
+
+Part of CivilKit, open structural engineering tools by Mage Engineering
+(https://mageengineering.com.au).
+
+Licensed under the Apache License, Version 2.0 (see LICENSE). The names "CivilKit" and
+"CivilKit Buckling" and the CivilKit logo are not licensed by it: see TRADEMARKS.md.
+
+This product is built on CUFSM, the finite strip software by B.W. Schafer and co-workers
+at Johns Hopkins University (https://www.ce.jhu.edu/cufsm/), with S. Ádány for the
+constrained finite strip method. CUFSM is distributed under the MIT License:
+
+    Copyright (c) 2023 Benjamin W. Schafer
+
+Its analysis engine is cufsm-rs (https://github.com/mageaustralia/cufsm-rs), a Rust port of
+CUFSM, MIT-licensed, Copyright (c) 2026 Matthew Campbell, compiled to WebAssembly as
+cufsm.wasm. cufsm-rs and CivilKit Buckling are an independent port, not affiliated with or
+endorsed by the CUFSM authors.
+
+It also includes third-party software under their own licences, among them MicroPython,
+fflate and the cufsm-rs-py Python package, and the Python console can download Pyodide with
+numpy, scipy and matplotlib. THIRD_PARTY_NOTICES lists each one with its licence and
+copyright notice.
