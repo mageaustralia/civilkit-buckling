@@ -1,6 +1,6 @@
 // @ts-check
-// @civilkit/moduleui/registry - IndexedDB-backed module registry (T071).
-// Implements the T069 registry interface: list()/get(id) are synchronous on an
+// @civilkit/moduleui/registry - IndexedDB-backed module registry.
+// Implements the module registry interface: list()/get(id) are synchronous on an
 // in-memory cache; install()/uninstall()/installFromStore() are async and
 // persist to IndexedDB. A memory fallback is used when IndexedDB is unavailable
 // (e.g. Node tests).
