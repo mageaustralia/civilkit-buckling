@@ -22,7 +22,7 @@ export function numFieldHtml({ id, label, unit = '', value, allowNegative = true
   return `<div class="field numfield ${cls}"${title ? ` title="${esc(title)}"` : ''}><label for="${esc(id)}">${esc(label)}</label>
     <div class="inp"><input id="${esc(id)}" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off"
       spellcheck="false" value="${esc(value)}">${unit ? `<span class="u">${esc(unit)}</span>` : ''}${
-      allowNegative ? '<button type="button" class="pm" aria-label="Change sign" tabindex="-1">±</button>' : ''}</div>
+      allowNegative ? '<button type="button" class="pm" aria-label="Change sign" title="Change sign (+/−)" tabindex="-1">±</button>' : ''}</div>
     <div class="msg" role="alert" hidden></div></div>`;
 }
 

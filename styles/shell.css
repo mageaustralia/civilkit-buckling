@@ -165,7 +165,8 @@ body:not([data-layout="compact"]) .editsheet { left: auto; right: 16px; bottom: 
   border-radius: 14px; border: 1px solid var(--line); }
 body:not([data-layout="compact"]) .editsheet::before { display: none; }
 
-.apptoast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 50;
+/* above the full views (the console and the module builder, z-index 65), so a message is never hidden behind one */
+.apptoast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 70;
   display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 14px; border-radius: 10px;
   background: var(--ink); color: var(--bg); box-shadow: var(--shadow); font-size: 14px; max-width: calc(100vw - 32px); }
 .apptoast[hidden] { display: none; }
@@ -175,6 +176,9 @@ body[data-layout="compact"] .apptoast { bottom: calc(var(--tabbar-h) + env(safe-
 /* ------------------------------------------- compact editors and number fields */
 .numfield .inp .pm { flex: none; border: 0; border-left: 1px solid var(--line2); background: none; color: var(--ink2);
   font: inherit; font-size: 15px; padding: 0 10px; align-self: stretch; cursor: pointer; }
+/* the ± key is for touch keypads with no minus key (the iOS decimal pad); with a mouse and keyboard
+   you type the minus, so the key is not shown there */
+@media (hover: hover) and (pointer: fine) { .numfield .inp .pm { display: none; } }
 .numfield .inp .pm:active { color: var(--accent); }
 .numfield input:focus { outline: none; }   /* the .inp box shows the focus */
 .numfield .msg { grid-column: 1 / -1; color: var(--bad); font-size: 12px; margin-top: -2px; }
@@ -306,7 +310,7 @@ body[data-layout="compact"] header .brand .netstate { order: -1; }
 /* Install shows only when the browser offers it: the compact actions row is Copy link and Report
    sharing what Docs (and Install) leave (grid-auto-flow: column above) */
 /* the update prompt stays until Reload or Later, above the toast's place */
-.swbar { z-index: 51; }
+.swbar { z-index: 71; }
 .swbar .btn[data-act="reload"] { font-weight: 600; }
 
 /* ------------------------------------------- accessibility and touch polish */
